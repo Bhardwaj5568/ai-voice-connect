@@ -10,7 +10,7 @@ export const Footer = () => {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center">
               <Phone className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">VoiceAI</span>
+            <span className="text-xl font-bold text-foreground">AIVocal</span>
           </div>
 
           {/* Links */}
@@ -46,7 +46,7 @@ export const Footer = () => {
 
         <div className="mt-8 pt-8 border-t border-border/30 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 VoiceAI Agency. All rights reserved. | Built with AI for AI.
+            © 2024 AIVocal.online. All rights reserved. | Built with AI for AI.
           </p>
         </div>
       </div>
