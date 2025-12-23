@@ -1,5 +1,6 @@
 import { Linkedin, MapPin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import founderImage from "@/assets/founder-neeraj.jpg";
 
 export const FounderSection = () => {
   return (
@@ -12,9 +13,11 @@ export const FounderSection = () => {
               <div className="flex justify-center md:justify-start">
                 <div className="relative">
                   <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-2 border-primary/30 glow">
-                    <div className="w-full h-full bg-gradient-to-br from-primary/30 to-cyan-500/30 flex items-center justify-center">
-                      <span className="text-6xl font-bold text-gradient">NS</span>
-                    </div>
+                    <img 
+                      src={founderImage} 
+                      alt="Neeraj Sharma - Founder & CEO" 
+                      className="w-full h-full object-cover object-top"
+                    />
                   </div>
                   <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                     <Linkedin className="w-5 h-5 text-primary-foreground" />
