@@ -42,7 +42,7 @@ export const FounderSection = () => {
                 </p>
                 <Button asChild variant="outline" size="default">
                   <a 
-                    href="https://www.linkedin.com/in/neerajsharma" 
+                    href="https://www.linkedin.com/in/neeraj-sharma-42834b167/" 
                     target="_blank" 
                     rel="noopener noreferrer"
                   >
