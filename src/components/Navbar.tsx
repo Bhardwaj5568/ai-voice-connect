@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Phone } from "lucide-react";
 import { useState } from "react";
-import logo from "@/assets/logo.png";
 
 const WHATSAPP_LINK = "https://wa.me/917792848355?text=Hi%2C%20I%27m%20interested%20in%20AI%20Voice%20Calling%20solutions%20for%20my%20business.";
 
@@ -18,8 +17,11 @@ export const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <a href="#" className="flex items-center">
-            <img src={logo} alt="AIVocal.online - AI Voice Calling Agency" className="h-10 w-auto" />
+          <a href="#" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center">
+              <Phone className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-bold text-foreground">AIVocal</span>
           </a>
 
           {/* Desktop Nav */}
