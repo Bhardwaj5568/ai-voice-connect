@@ -1,9 +1,69 @@
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Float, Text, RoundedBox, Cylinder, Torus, MeshDistortMaterial, Environment, ContactShadows } from '@react-three/drei';
+import { OrbitControls, Float, Text, RoundedBox, Cylinder, Torus, MeshDistortMaterial, Environment, ContactShadows, Sparkles } from '@react-three/drei';
 import { useRef, useState, Suspense } from 'react';
 import * as THREE from 'three';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw, ZoomIn, ZoomOut, Loader2 } from 'lucide-react';
+
+// Loading component for 3D canvas
+const Loader3D = () => (
+  <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-primary/20 rounded-full" />
+        <div className="absolute inset-0 w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+      <p className="text-sm text-muted-foreground animate-pulse">Loading 3D Model...</p>
+    </div>
+  </div>
+);
+
+// Particle effects component
+const ParticleAura = ({ color }: { color: string }) => {
+  return (
+    <>
+      <Sparkles
+        count={100}
+        scale={4}
+        size={2}
+        speed={0.4}
+        color={color}
+        opacity={0.6}
+      />
+      <Sparkles
+        count={50}
+        scale={3}
+        size={4}
+        speed={0.2}
+        color="#8b5cf6"
+        opacity={0.4}
+      />
+    </>
+  );
+};
+
+// Glowing aura effect
+const GlowingAura = ({ color }: { color: string }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.scale.setScalar(1.8 + Math.sin(state.clock.elapsedTime * 2) * 0.1);
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, 0, 0]}>
+      <sphereGeometry args={[1, 32, 32]} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={0.1}
+        side={THREE.BackSide}
+      />
+    </mesh>
+  );
+};
 
 interface ProductProps {
   isActive: boolean;
@@ -327,44 +387,50 @@ export const ProductShowcase3D = () => {
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* 3D Canvas */}
           <div className="relative h-[400px] md:h-[500px] glass-card rounded-2xl overflow-hidden">
-            <Canvas
-              camera={{ position: [0, 0, zoom], fov: 50 }}
-              dpr={[1, 2]}
-              gl={{ antialias: true, alpha: true }}
-            >
-              <Suspense fallback={null}>
-                <ambientLight intensity={0.4} />
-                <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
-                <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
-                
-                <ActiveModel isActive={true} color={activeProduct.color} />
-                
-                <ContactShadows
-                  position={[0, -2, 0]}
-                  opacity={0.4}
-                  scale={10}
-                  blur={2}
-                  far={4}
-                />
-                
-                <Environment preset="city" />
-                
-                <OrbitControls
-                  ref={controlsRef}
-                  enableZoom={true}
-                  enablePan={false}
-                  minDistance={3}
-                  maxDistance={8}
-                  autoRotate={!isInteracting}
-                  autoRotateSpeed={1.5}
-                  enableDamping={true}
-                  dampingFactor={0.05}
-                  touches={{ ONE: 1, TWO: 2 }}
-                  onStart={handleInteractionStart}
-                  onEnd={handleInteractionEnd}
-                />
-              </Suspense>
-            </Canvas>
+            <Suspense fallback={<Loader3D />}>
+              <Canvas
+                camera={{ position: [0, 0, zoom], fov: 50 }}
+                dpr={[1, 2]}
+                gl={{ antialias: true, alpha: true }}
+              >
+                <Suspense fallback={null}>
+                  <ambientLight intensity={0.4} />
+                  <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
+                  <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
+                  
+                  {/* Particle and glow effects */}
+                  <ParticleAura color={activeProduct.color} />
+                  <GlowingAura color={activeProduct.color} />
+                  
+                  <ActiveModel isActive={true} color={activeProduct.color} />
+                  
+                  <ContactShadows
+                    position={[0, -2, 0]}
+                    opacity={0.4}
+                    scale={10}
+                    blur={2}
+                    far={4}
+                  />
+                  
+                  <Environment preset="city" />
+                  
+                  <OrbitControls
+                    ref={controlsRef}
+                    enableZoom={true}
+                    enablePan={false}
+                    minDistance={3}
+                    maxDistance={8}
+                    autoRotate={!isInteracting}
+                    autoRotateSpeed={1.5}
+                    enableDamping={true}
+                    dampingFactor={0.05}
+                    touches={{ ONE: 1, TWO: 2 }}
+                    onStart={handleInteractionStart}
+                    onEnd={handleInteractionEnd}
+                  />
+                </Suspense>
+              </Canvas>
+            </Suspense>
 
 
             {/* Product indicator dots */}
