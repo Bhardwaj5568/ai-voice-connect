@@ -10,7 +10,7 @@ import { HowItWorksSection } from "@/components/HowItWorksSection";
 import { IndustriesSection } from "@/components/IndustriesSection";
 import { ServicesSection } from "@/components/ServicesSection";
 import { IntegrationsSection } from "@/components/IntegrationsSection";
-import { TestimonialsSection } from "@/components/TestimonialsSection";
+
 import { ROICalculator } from "@/components/ROICalculator";
 import { PricingSection } from "@/components/PricingSection";
 import { TrustSection } from "@/components/TrustSection";
@@ -78,9 +78,6 @@ const Index = () => {
         </section>
         <section className="scroll-snap-section">
           <CaseStudiesSection />
-        </section>
-        <section className="scroll-snap-section">
-          <TestimonialsSection />
         </section>
         <section className="scroll-snap-section-auto">
           <PressSection />
