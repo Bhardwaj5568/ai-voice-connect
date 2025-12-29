@@ -452,10 +452,11 @@ export const ProductShowcase3D = () => {
             <div className="flex gap-4 pt-4">
               <Button 
                 className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90"
+                onClick={() => {
+                  const message = encodeURIComponent(`Hi, I'd like to request a demo for ${activeProduct.name}.`);
+                  window.open(`https://wa.me/917792848355?text=${message}`, '_blank');
+                }}
               >
-                Learn More
-              </Button>
-              <Button variant="outline">
                 Request Demo
               </Button>
             </div>
