@@ -65,6 +65,18 @@ interface Message {
 // Confidence threshold for speech recognition
 const CONFIDENCE_THRESHOLD = 0.6;
 
+// Haptic feedback utility
+const triggerHaptic = (pattern: 'light' | 'medium' | 'heavy' = 'light') => {
+  if ('vibrate' in navigator) {
+    const patterns = {
+      light: [10],
+      medium: [20],
+      heavy: [30, 50, 30]
+    };
+    navigator.vibrate(patterns[pattern]);
+  }
+};
+
 // Split text at natural sentence boundaries for smoother TTS
 const splitIntoChunks = (text: string): string[] => {
   // Split by sentence-ending punctuation while keeping the punctuation
@@ -234,6 +246,7 @@ export const VoiceAgent = () => {
 
     utterance.onstart = () => {
       setEmotion(detectEmotion(text));
+      triggerHaptic('medium'); // Haptic when AI starts speaking
     };
     
     utterance.onend = () => {
@@ -334,6 +347,7 @@ export const VoiceAgent = () => {
     
     recognition.onstart = () => {
       setIsListening(true);
+      triggerHaptic('light'); // Subtle haptic when listening starts
     };
 
     recognition.onresult = (event) => {
