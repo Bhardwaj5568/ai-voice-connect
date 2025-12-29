@@ -55,7 +55,7 @@ export const Footer = () => {
               Trusted by 500+ companies worldwide to deliver exceptional experiences at scale.
             </p>
             
-            {/* WhatsApp Link */}
+            {/* Contact Links */}
             <div className="flex gap-3 mb-8">
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}`}
@@ -65,6 +65,13 @@ export const Footer = () => {
                 className="w-10 h-10 rounded-xl bg-green-500/20 hover:bg-green-500/30 hover:text-green-500 border border-green-500/30 flex items-center justify-center text-green-500 transition-all duration-300 hover:scale-110"
               >
                 <MessageCircle className="w-5 h-5" />
+              </a>
+              <a
+                href="mailto:aivocal.online@gmail.com"
+                aria-label="Email"
+                className="w-10 h-10 rounded-xl bg-primary/20 hover:bg-primary/30 hover:text-primary border border-primary/30 flex items-center justify-center text-primary transition-all duration-300 hover:scale-110"
+              >
+                <Mail className="w-5 h-5" />
               </a>
             </div>
 
