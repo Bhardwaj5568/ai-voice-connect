@@ -133,9 +133,9 @@ export const Footer = () => {
                 <Phone className="w-4 h-4" />
                 +91 8386802004
               </a>
-              <a href="mailto:contact@voiceai.agency" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a href="mailto:aivocal.online@gmail.com" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 <Mail className="w-4 h-4" />
-                contact@voiceai.agency
+                aivocal.online@gmail.com
               </a>
             </div>
           </div>
