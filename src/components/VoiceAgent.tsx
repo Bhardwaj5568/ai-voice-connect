@@ -1,11 +1,11 @@
 import { useState, useRef, useCallback, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Volume2, X, Globe } from 'lucide-react';
+import { MicOff, X, Globe, VolumeX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { VoiceWaveform } from './VoiceWaveform';
-import { TypingIndicator } from './TypingIndicator';
-import { AIAvatar3D } from './AIAvatar3D';
+import { AIAvatar3D, AvatarEmotion } from './AIAvatar3D';
+import { FloatingMiniAvatar } from './FloatingMiniAvatar';
 
 // TypeScript declarations for Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -68,12 +68,15 @@ export const VoiceAgent = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [detectedLanguage, setDetectedLanguage] = useState<string>('English');
+  const [emotion, setEmotion] = useState<AvatarEmotion>('neutral');
+  const [isGreeting, setIsGreeting] = useState(false);
   
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
   const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isActiveRef = useRef(false);
 
   // Language mapping for speech synthesis
   const languageVoiceMap: Record<string, string> = {
@@ -91,9 +94,23 @@ export const VoiceAgent = () => {
     'italian': 'it-IT',
   };
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  // Detect emotion from response content
+  const detectEmotion = (text: string): AvatarEmotion => {
+    const lowerText = text.toLowerCase();
+    if (lowerText.includes('sorry') || lowerText.includes('unfortunately') || lowerText.includes("don't know") || lowerText.includes('not sure')) {
+      return 'confused';
+    }
+    if (lowerText.includes('great') || lowerText.includes('excellent') || lowerText.includes('happy') || lowerText.includes('wonderful') || lowerText.includes('!')) {
+      return 'happy';
+    }
+    if (lowerText.includes('let me think') || lowerText.includes('considering') || lowerText.includes('perhaps') || lowerText.includes('interesting')) {
+      return 'thinking';
+    }
+    if (lowerText.includes('amazing') || lowerText.includes('wow') || lowerText.includes('fantastic')) {
+      return 'excited';
+    }
+    return 'neutral';
+  };
 
   const initSpeechRecognition = useCallback(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -108,15 +125,16 @@ export const VoiceAgent = () => {
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognitionAPI();
     
-    recognition.continuous = false;
+    // Enable continuous listening
+    recognition.continuous = true;
     recognition.interimResults = false;
-    recognition.lang = 'en-US'; // Will auto-detect language
+    recognition.lang = 'en-US';
     
     return recognition;
   }, [toast]);
 
   const speakText = useCallback((text: string, language: string) => {
-    if ('speechSynthesis' in window) {
+    if ('speechSynthesis' in window && !isMuted) {
       window.speechSynthesis.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
@@ -125,23 +143,58 @@ export const VoiceAgent = () => {
       utterance.rate = 1;
       utterance.pitch = 1;
       
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+        setEmotion(detectEmotion(text));
+      };
+      
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        setEmotion('neutral');
+        // Resume listening after speaking (if still active)
+        if (isActiveRef.current && recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+          } catch {
+            // Already started
+          }
+        }
+      };
+      
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        if (isActiveRef.current && recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+          } catch {
+            // Already started
+          }
+        }
+      };
       
       synthesisRef.current = utterance;
       window.speechSynthesis.speak(utterance);
     }
-  }, []);
+  }, [isMuted]);
 
   const processWithAI = useCallback(async (userMessage: string) => {
     setIsProcessing(true);
+    setEmotion('thinking');
+    
+    // Stop listening while processing
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // Already stopped
+      }
+    }
     
     try {
       const { data, error } = await supabase.functions.invoke('voice-agent', {
         body: { 
           message: userMessage,
-          conversationHistory: messages.slice(-10) // Last 10 messages for context
+          conversationHistory: messages.slice(-10)
         }
       });
 
@@ -158,25 +211,36 @@ export const VoiceAgent = () => {
         language: detectedLang
       }]);
       
-      // Speak the response in detected language
+      // Speak the response
       speakText(aiResponse, detectedLang);
       
     } catch (error) {
       console.error('AI processing error:', error);
+      setEmotion('confused');
       toast({
         title: "Error",
         description: "Failed to process your request. Please try again.",
         variant: "destructive",
       });
+      
+      // Resume listening even after error
+      if (isActiveRef.current && recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+        } catch {
+          // Already started
+        }
+      }
     } finally {
       setIsProcessing(false);
     }
   }, [messages, speakText, toast]);
 
-  const startListening = useCallback(() => {
+  const startContinuousListening = useCallback(() => {
     const recognition = initSpeechRecognition();
     if (!recognition) return;
 
+    isActiveRef.current = true;
     recognitionRef.current = recognition;
     
     recognition.onstart = () => {
@@ -184,195 +248,224 @@ export const VoiceAgent = () => {
     };
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setMessages(prev => [...prev, { role: 'user', content: transcript }]);
-      processWithAI(transcript);
+      // Get the latest result
+      const lastResultIndex = event.results.length - 1;
+      const transcript = event.results[lastResultIndex][0].transcript;
+      
+      if (transcript.trim()) {
+        setMessages(prev => [...prev, { role: 'user', content: transcript }]);
+        processWithAI(transcript);
+      }
     };
 
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
-      setIsListening(false);
-      if (event.error !== 'no-speech') {
-        toast({
-          title: "Error",
-          description: "Could not recognize speech. Please try again.",
-          variant: "destructive",
-        });
+      
+      if (event.error === 'no-speech' || event.error === 'audio-capture') {
+        // Restart recognition for these non-fatal errors
+        if (isActiveRef.current) {
+          setTimeout(() => {
+            try {
+              recognition.start();
+            } catch {
+              // Already started or other issue
+            }
+          }, 100);
+        }
       }
     };
 
     recognition.onend = () => {
       setIsListening(false);
+      
+      // Auto-restart if still active and not speaking
+      if (isActiveRef.current && !isSpeaking && !isProcessing) {
+        setTimeout(() => {
+          try {
+            recognition.start();
+          } catch {
+            // Already started
+          }
+        }, 100);
+      }
     };
 
     recognition.start();
-  }, [initSpeechRecognition, processWithAI, toast]);
+  }, [initSpeechRecognition, processWithAI, isSpeaking, isProcessing]);
 
-  const stopListening = useCallback(() => {
+  const stopAllActivity = useCallback(() => {
+    isActiveRef.current = false;
+    
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       setIsListening(false);
     }
-  }, []);
-
-  const stopSpeaking = useCallback(() => {
+    
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     }
   }, []);
 
+  const handleOpen = useCallback(() => {
+    setIsOpen(true);
+    setIsGreeting(true);
+    setEmotion('happy');
+    
+    // Start greeting
+    setTimeout(() => {
+      setIsGreeting(false);
+      // Start continuous listening after greeting
+      startContinuousListening();
+      
+      // Speak greeting
+      const greeting = "Hello! I'm your AI assistant. How can I help you today?";
+      setMessages([{ role: 'assistant', content: greeting, language: 'English' }]);
+      speakText(greeting, 'English');
+    }, 2000);
+  }, [startContinuousListening, speakText]);
+
+  const handleClose = useCallback(() => {
+    stopAllActivity();
+    setIsOpen(false);
+    setMessages([]);
+    setEmotion('neutral');
+  }, [stopAllActivity]);
+
+  const toggleMute = useCallback(() => {
+    setIsMuted(prev => !prev);
+    if (!isMuted && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  }, [isMuted]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopAllActivity();
+    };
+  }, [stopAllActivity]);
+
+  const getAvatarState = () => {
+    if (isListening && !isSpeaking && !isProcessing) return 'listening';
+    if (isSpeaking) return 'speaking';
+    if (isProcessing) return 'processing';
+    return 'idle';
+  };
+
   return (
     <>
-      {/* Floating Voice Button */}
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 shadow-lg shadow-primary/25 animate-pulse-glow"
-        size="icon"
-      >
-        <Mic className="w-7 h-7" />
-      </Button>
+      {/* Floating Mini Avatar */}
+      {!isOpen && (
+        <FloatingMiniAvatar 
+          isActive={false} 
+          onClick={handleOpen}
+        />
+      )}
 
-      {/* Voice Agent Modal */}
+      {/* Full Voice Agent Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-lg bg-background/95 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl overflow-hidden">
-            {/* 3D Avatar Section */}
-            <div className="h-48 bg-gradient-to-b from-primary/5 to-transparent relative">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-md bg-background/95 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl overflow-hidden">
+            {/* 3D Avatar Section - Much larger now */}
+            <div className="h-80 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent relative">
               <Suspense fallback={
                 <div className="w-full h-full flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-primary/20 animate-pulse" />
+                  <div className="w-24 h-24 rounded-full bg-primary/20 animate-pulse" />
                 </div>
               }>
                 <AIAvatar3D 
-                  state={
-                    isListening ? 'listening' : 
-                    isSpeaking ? 'speaking' : 
-                    isProcessing ? 'processing' : 
-                    'idle'
-                  } 
+                  state={getAvatarState()}
+                  emotion={emotion}
+                  isGreeting={isGreeting}
                 />
               </Suspense>
               
-              {/* Close button overlay */}
+              {/* Close button */}
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => setIsOpen(false)}
-                className="absolute top-2 right-2 bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                onClick={handleClose}
+                className="absolute top-4 right-4 bg-background/50 backdrop-blur-sm hover:bg-background/80 rounded-full"
               >
                 <X className="w-5 h-5" />
               </Button>
+              
+              {/* Mute button */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleMute}
+                className={`absolute top-4 left-4 backdrop-blur-sm rounded-full ${
+                  isMuted ? 'bg-red-500/50 hover:bg-red-500/70' : 'bg-background/50 hover:bg-background/80'
+                }`}
+              >
+                {isMuted ? <VolumeX className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+              </Button>
             </div>
 
-            {/* Header */}
-            <div className="flex items-center justify-center p-3 border-b border-border/50 bg-gradient-to-r from-primary/10 to-cyan-500/10">
-              <div className="text-center">
-                <h3 className="font-semibold text-foreground">AIVocal Assistant</h3>
+            {/* Status Bar */}
+            <div className="flex items-center justify-center p-4 border-t border-border/50 bg-gradient-to-r from-primary/5 to-cyan-500/5">
+              <div className="text-center space-y-2">
+                <div className="flex items-center justify-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${
+                    isListening ? 'bg-red-500 animate-pulse' : 
+                    isSpeaking ? 'bg-green-500 animate-pulse' : 
+                    isProcessing ? 'bg-orange-500 animate-pulse' : 
+                    'bg-primary'
+                  }`} />
+                  <span className="font-medium text-foreground">
+                    {isListening ? 'Listening...' : 
+                     isSpeaking ? 'Speaking...' : 
+                     isProcessing ? 'Thinking...' : 
+                     'Ready'}
+                  </span>
+                </div>
+                
                 <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
                   <Globe className="w-3 h-3" />
-                  <span>Speaking: {detectedLanguage}</span>
+                  <span>{detectedLanguage}</span>
                 </div>
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="h-48 overflow-y-auto p-4 space-y-3">
-              {messages.length === 0 && (
-                <div className="text-center text-muted-foreground py-4">
-                  <p className="text-sm">Press the microphone and speak in any language.</p>
-                  <p className="text-xs mt-1">Supports English, Hindi, Spanish & more</p>
-                </div>
-              )}
-              
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] px-4 py-2 rounded-2xl ${
-                      msg.role === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-br-md'
-                        : 'bg-muted text-foreground rounded-bl-md'
-                    }`}
-                  >
-                    <p className="text-sm">{msg.content}</p>
-                    {msg.language && msg.role === 'assistant' && (
-                      <span className="text-xs opacity-70 mt-1 block">{msg.language}</span>
-                    )}
+            {/* Audio Visualization */}
+            <div className="p-6 bg-muted/20">
+              <div className="flex justify-center items-center h-16">
+                {(isListening || isSpeaking) ? (
+                  <VoiceWaveform 
+                    isActive={true} 
+                    color={isListening ? 'hsl(var(--destructive))' : 'hsl(142, 71%, 45%)'} 
+                    barCount={15}
+                  />
+                ) : isProcessing ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
-                </div>
-              ))}
-              
-              {isProcessing && (
-                <div className="flex justify-start">
-                  <div className="bg-muted rounded-2xl rounded-bl-md">
-                    <TypingIndicator />
-                  </div>
-                </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Controls */}
-            <div className="p-4 border-t border-border/50 bg-muted/30">
-              <div className="flex items-center justify-center gap-4">
-                {isSpeaking && (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={stopSpeaking}
-                    className="w-12 h-12 rounded-full border-primary/50"
-                  >
-                    <VoiceWaveform isActive={isSpeaking} color="hsl(var(--primary))" barCount={3} />
-                  </Button>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Speak naturally — I'm always listening
+                  </p>
                 )}
-                
-                <div className="relative">
-                  <Button
-                    onClick={isListening ? stopListening : startListening}
-                    disabled={isProcessing}
-                    className={`w-16 h-16 rounded-full transition-all ${
-                      isListening
-                        ? 'bg-red-500 hover:bg-red-600'
-                        : 'bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90'
-                    }`}
-                    size="icon"
-                  >
-                    {isListening ? (
-                      <MicOff className="w-7 h-7" />
-                    ) : (
-                      <Mic className="w-7 h-7" />
-                    )}
-                  </Button>
-                  
-                  {/* Listening pulse ring */}
-                  {isListening && (
-                    <>
-                      <span className="absolute inset-0 rounded-full animate-ping bg-red-500/30" />
-                      <span className="absolute -inset-2 rounded-full border-2 border-red-500/50 animate-pulse" />
-                    </>
-                  )}
-                </div>
               </div>
               
-              {/* Waveform visualization when listening */}
-              {isListening && (
-                <div className="mt-4 flex justify-center">
-                  <VoiceWaveform isActive={isListening} color="hsl(var(--destructive))" barCount={9} />
+              {/* Latest message preview */}
+              {messages.length > 0 && (
+                <div className="mt-4 p-3 rounded-xl bg-background/50 border border-border/30">
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {messages[messages.length - 1].content}
+                  </p>
                 </div>
               )}
-              
-              <p className="text-center text-xs text-muted-foreground mt-3">
-                {isListening 
-                  ? 'Listening... Speak now' 
-                  : isProcessing 
-                    ? 'Processing your request...' 
-                    : isSpeaking
-                      ? 'Speaking response...'
-                      : 'Tap to speak'}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 text-center border-t border-border/30">
+              <p className="text-xs text-muted-foreground">
+                Tap <X className="inline w-3 h-3" /> to end conversation
               </p>
             </div>
           </div>
