@@ -62,6 +62,25 @@ interface Message {
   language?: string;
 }
 
+// Split long text into speakable chunks for smoother TTS
+const splitIntoChunks = (text: string, maxLength: number = 150): string[] => {
+  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+  const chunks: string[] = [];
+  let currentChunk = '';
+
+  for (const sentence of sentences) {
+    if ((currentChunk + sentence).length <= maxLength) {
+      currentChunk += sentence;
+    } else {
+      if (currentChunk) chunks.push(currentChunk.trim());
+      currentChunk = sentence;
+    }
+  }
+  if (currentChunk) chunks.push(currentChunk.trim());
+  
+  return chunks;
+};
+
 export const VoiceAgent = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -75,8 +94,9 @@ export const VoiceAgent = () => {
   const [isGreeting, setIsGreeting] = useState(false);
   
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
-  const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
   const isActiveRef = useRef(false);
+  const speechQueueRef = useRef<string[]>([]);
+  const isSpeakingRef = useRef(false);
 
   // Language mapping for speech synthesis
   const languageVoiceMap: Record<string, string> = {
@@ -112,6 +132,23 @@ export const VoiceAgent = () => {
     return 'neutral';
   };
 
+  // Get best available voice for language
+  const getBestVoice = useCallback((langCode: string): SpeechSynthesisVoice | null => {
+    const voices = window.speechSynthesis.getVoices();
+    
+    // Try to find a voice that matches the language
+    const langPrefix = langCode.split('-')[0];
+    
+    // Prefer online/natural voices
+    let voice = voices.find(v => v.lang.startsWith(langPrefix) && v.name.toLowerCase().includes('natural'));
+    if (!voice) voice = voices.find(v => v.lang.startsWith(langPrefix) && v.name.toLowerCase().includes('online'));
+    if (!voice) voice = voices.find(v => v.lang.startsWith(langPrefix) && !v.localService);
+    if (!voice) voice = voices.find(v => v.lang.startsWith(langPrefix));
+    if (!voice) voice = voices.find(v => v.lang === 'en-US');
+    
+    return voice || null;
+  }, []);
+
   const initSpeechRecognition = useCallback(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       toast({
@@ -125,7 +162,6 @@ export const VoiceAgent = () => {
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognitionAPI();
     
-    // Enable continuous listening
     recognition.continuous = true;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
@@ -133,25 +169,13 @@ export const VoiceAgent = () => {
     return recognition;
   }, [toast]);
 
-  const speakText = useCallback((text: string, language: string) => {
-    if ('speechSynthesis' in window && !isMuted) {
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      const langCode = languageVoiceMap[language.toLowerCase()] || 'en-US';
-      utterance.lang = langCode;
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      
-      utterance.onstart = () => {
-        setIsSpeaking(true);
-        setEmotion(detectEmotion(text));
-      };
-      
-      utterance.onend = () => {
+  // Process speech queue - speak chunks one by one
+  const processSpeechQueue = useCallback(() => {
+    if (isSpeakingRef.current || speechQueueRef.current.length === 0 || isMuted) {
+      if (speechQueueRef.current.length === 0) {
         setIsSpeaking(false);
         setEmotion('neutral');
-        // Resume listening after speaking (if still active)
+        // Resume listening after all speech is done
         if (isActiveRef.current && recognitionRef.current) {
           try {
             recognitionRef.current.start();
@@ -159,23 +183,59 @@ export const VoiceAgent = () => {
             // Already started
           }
         }
-      };
-      
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        if (isActiveRef.current && recognitionRef.current) {
-          try {
-            recognitionRef.current.start();
-          } catch {
-            // Already started
-          }
-        }
-      };
-      
-      synthesisRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
+      }
+      return;
     }
-  }, [isMuted]);
+
+    isSpeakingRef.current = true;
+    setIsSpeaking(true);
+    
+    const text = speechQueueRef.current.shift()!;
+    const langCode = languageVoiceMap[detectedLanguage.toLowerCase()] || 'en-US';
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = langCode;
+    utterance.rate = 1.1; // Slightly faster for more natural feel
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    // Try to get best voice
+    const voice = getBestVoice(langCode);
+    if (voice) {
+      utterance.voice = voice;
+    }
+
+    utterance.onstart = () => {
+      setEmotion(detectEmotion(text));
+    };
+    
+    utterance.onend = () => {
+      isSpeakingRef.current = false;
+      processSpeechQueue(); // Process next chunk
+    };
+    
+    utterance.onerror = () => {
+      isSpeakingRef.current = false;
+      processSpeechQueue(); // Continue with next chunk even on error
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }, [isMuted, detectedLanguage, getBestVoice]);
+
+  const speakText = useCallback((text: string, language: string) => {
+    if (!('speechSynthesis' in window) || isMuted) return;
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    isSpeakingRef.current = false;
+    
+    // Split into chunks for smoother delivery
+    const chunks = splitIntoChunks(text);
+    speechQueueRef.current = chunks;
+    
+    setDetectedLanguage(language);
+    processSpeechQueue();
+  }, [isMuted, processSpeechQueue]);
 
   const processWithAI = useCallback(async (userMessage: string) => {
     setIsProcessing(true);
@@ -194,7 +254,7 @@ export const VoiceAgent = () => {
       const { data, error } = await supabase.functions.invoke('voice-agent', {
         body: { 
           message: userMessage,
-          conversationHistory: messages.slice(-10)
+          conversationHistory: messages.slice(-4) // Reduced for speed
         }
       });
 
@@ -248,7 +308,6 @@ export const VoiceAgent = () => {
     };
 
     recognition.onresult = (event) => {
-      // Get the latest result
       const lastResultIndex = event.results.length - 1;
       const transcript = event.results[lastResultIndex][0].transcript;
       
@@ -262,13 +321,12 @@ export const VoiceAgent = () => {
       console.error('Speech recognition error:', event.error);
       
       if (event.error === 'no-speech' || event.error === 'audio-capture') {
-        // Restart recognition for these non-fatal errors
-        if (isActiveRef.current) {
+        if (isActiveRef.current && !isSpeakingRef.current) {
           setTimeout(() => {
             try {
               recognition.start();
             } catch {
-              // Already started or other issue
+              // Already started
             }
           }, 100);
         }
@@ -278,8 +336,7 @@ export const VoiceAgent = () => {
     recognition.onend = () => {
       setIsListening(false);
       
-      // Auto-restart if still active and not speaking
-      if (isActiveRef.current && !isSpeaking && !isProcessing) {
+      if (isActiveRef.current && !isSpeakingRef.current && !isProcessing) {
         setTimeout(() => {
           try {
             recognition.start();
@@ -291,7 +348,7 @@ export const VoiceAgent = () => {
     };
 
     recognition.start();
-  }, [initSpeechRecognition, processWithAI, isSpeaking, isProcessing]);
+  }, [initSpeechRecognition, processWithAI, isProcessing]);
 
   const stopAllActivity = useCallback(() => {
     isActiveRef.current = false;
@@ -304,6 +361,8 @@ export const VoiceAgent = () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      speechQueueRef.current = [];
     }
   }, []);
 
@@ -312,17 +371,20 @@ export const VoiceAgent = () => {
     setIsGreeting(true);
     setEmotion('happy');
     
+    // Load voices
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+    }
+    
     // Start greeting
     setTimeout(() => {
       setIsGreeting(false);
-      // Start continuous listening after greeting
       startContinuousListening();
       
-      // Speak greeting
-      const greeting = "Hello! I'm your AI assistant. How can I help you today?";
+      const greeting = "Hello! How can I help you today?";
       setMessages([{ role: 'assistant', content: greeting, language: 'English' }]);
       speakText(greeting, 'English');
-    }, 2000);
+    }, 1500); // Reduced greeting delay
   }, [startContinuousListening, speakText]);
 
   const handleClose = useCallback(() => {
@@ -337,6 +399,8 @@ export const VoiceAgent = () => {
     if (!isMuted && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      speechQueueRef.current = [];
     }
   }, [isMuted]);
 
@@ -346,6 +410,16 @@ export const VoiceAgent = () => {
       stopAllActivity();
     };
   }, [stopAllActivity]);
+
+  // Preload voices on mount
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
 
   const getAvatarState = () => {
     if (isListening && !isSpeaking && !isProcessing) return 'listening';
@@ -368,7 +442,7 @@ export const VoiceAgent = () => {
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-md bg-background/95 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl overflow-hidden">
-            {/* 3D Avatar Section - Much larger now */}
+            {/* 3D Avatar Section */}
             <div className="h-80 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent relative">
               <Suspense fallback={
                 <div className="w-full h-full flex items-center justify-center">
