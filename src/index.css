@@ -324,3 +324,34 @@
     transform: translateY(0);
   }
 }
+
+/* Scroll Snap Container */
+.scroll-snap-container {
+  scroll-snap-type: y proximity;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.scroll-snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+
+.scroll-snap-section-auto {
+  scroll-snap-align: none;
+}
+
+/* Smooth scroll padding for fixed navbar */
+@supports (scroll-padding-top: 80px) {
+  .scroll-snap-container {
+    scroll-padding-top: 80px;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-snap-container {
+    scroll-snap-type: none;
+    scroll-behavior: auto;
+  }
+}

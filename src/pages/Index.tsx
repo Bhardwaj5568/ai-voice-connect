@@ -33,7 +33,7 @@ const Scene3D = lazy(() => import("@/components/Scene3D").then(m => ({ default: 
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background scroll-snap-container">
       <LoadingSplash />
       <ScrollProgress />
       <ParallaxBackground />
@@ -46,26 +46,66 @@ const Index = () => {
       <AnnouncementBar />
       <Navbar />
       <main>
-        <HeroSection />
-        <ClientLogos />
-        <ProblemSection />
-        <SolutionSection />
-        <ProductShowcase3D />
-        <HowItWorksSection />
-        <ComparisonSlider />
-        <IndustriesSection />
-        <ServicesSection />
-        <IntegrationsSection />
-        <CaseStudiesSection />
-        <TestimonialsSection />
-        <PressSection />
-        <ROICalculator />
-        <PricingSection />
-        <TrustSection />
-        <SecurityBadges />
-        <FAQSection />
-        <FounderSection />
-        <WhatsAppCTA />
+        <section className="scroll-snap-section">
+          <HeroSection />
+        </section>
+        <section className="scroll-snap-section-auto">
+          <ClientLogos />
+        </section>
+        <section className="scroll-snap-section">
+          <ProblemSection />
+        </section>
+        <section className="scroll-snap-section">
+          <SolutionSection />
+        </section>
+        <section className="scroll-snap-section">
+          <ProductShowcase3D />
+        </section>
+        <section className="scroll-snap-section">
+          <HowItWorksSection />
+        </section>
+        <section className="scroll-snap-section">
+          <ComparisonSlider />
+        </section>
+        <section className="scroll-snap-section">
+          <IndustriesSection />
+        </section>
+        <section className="scroll-snap-section">
+          <ServicesSection />
+        </section>
+        <section className="scroll-snap-section">
+          <IntegrationsSection />
+        </section>
+        <section className="scroll-snap-section">
+          <CaseStudiesSection />
+        </section>
+        <section className="scroll-snap-section">
+          <TestimonialsSection />
+        </section>
+        <section className="scroll-snap-section-auto">
+          <PressSection />
+        </section>
+        <section className="scroll-snap-section">
+          <ROICalculator />
+        </section>
+        <section className="scroll-snap-section">
+          <PricingSection />
+        </section>
+        <section className="scroll-snap-section-auto">
+          <TrustSection />
+        </section>
+        <section className="scroll-snap-section-auto">
+          <SecurityBadges />
+        </section>
+        <section className="scroll-snap-section">
+          <FAQSection />
+        </section>
+        <section className="scroll-snap-section">
+          <FounderSection />
+        </section>
+        <section className="scroll-snap-section">
+          <WhatsAppCTA />
+        </section>
       </main>
       <Footer />
       <FloatingWhatsApp />
