@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Volume2, Loader2, X, Globe } from 'lucide-react';
+import { Mic, MicOff, Volume2, X, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { VoiceWaveform } from './VoiceWaveform';
+import { TypingIndicator } from './TypingIndicator';
 
 // TypeScript declarations for Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -238,7 +240,11 @@ export const VoiceAgent = () => {
             <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-to-r from-primary/10 to-cyan-500/10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-cyan-500 flex items-center justify-center">
-                  <Volume2 className="w-5 h-5 text-white" />
+                  {isSpeaking ? (
+                    <VoiceWaveform isActive={isSpeaking} color="white" barCount={3} />
+                  ) : (
+                    <Volume2 className="w-5 h-5 text-white" />
+                  )}
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">AIVocal Assistant</h3>
@@ -287,8 +293,8 @@ export const VoiceAgent = () => {
               
               {isProcessing && (
                 <div className="flex justify-start">
-                  <div className="bg-muted px-4 py-3 rounded-2xl rounded-bl-md">
-                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <div className="bg-muted rounded-2xl rounded-bl-md">
+                    <TypingIndicator />
                   </div>
                 </div>
               )}
@@ -304,36 +310,55 @@ export const VoiceAgent = () => {
                     variant="outline"
                     size="icon"
                     onClick={stopSpeaking}
-                    className="w-12 h-12 rounded-full"
+                    className="w-12 h-12 rounded-full border-primary/50"
                   >
-                    <Volume2 className="w-5 h-5 animate-pulse" />
+                    <VoiceWaveform isActive={isSpeaking} color="hsl(var(--primary))" barCount={3} />
                   </Button>
                 )}
                 
-                <Button
-                  onClick={isListening ? stopListening : startListening}
-                  disabled={isProcessing}
-                  className={`w-16 h-16 rounded-full transition-all ${
-                    isListening
-                      ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-                      : 'bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90'
-                  }`}
-                  size="icon"
-                >
-                  {isListening ? (
-                    <MicOff className="w-7 h-7" />
-                  ) : (
-                    <Mic className="w-7 h-7" />
+                <div className="relative">
+                  <Button
+                    onClick={isListening ? stopListening : startListening}
+                    disabled={isProcessing}
+                    className={`w-16 h-16 rounded-full transition-all ${
+                      isListening
+                        ? 'bg-red-500 hover:bg-red-600'
+                        : 'bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90'
+                    }`}
+                    size="icon"
+                  >
+                    {isListening ? (
+                      <MicOff className="w-7 h-7" />
+                    ) : (
+                      <Mic className="w-7 h-7" />
+                    )}
+                  </Button>
+                  
+                  {/* Listening pulse ring */}
+                  {isListening && (
+                    <>
+                      <span className="absolute inset-0 rounded-full animate-ping bg-red-500/30" />
+                      <span className="absolute -inset-2 rounded-full border-2 border-red-500/50 animate-pulse" />
+                    </>
                   )}
-                </Button>
+                </div>
               </div>
+              
+              {/* Waveform visualization when listening */}
+              {isListening && (
+                <div className="mt-4 flex justify-center">
+                  <VoiceWaveform isActive={isListening} color="hsl(var(--destructive))" barCount={9} />
+                </div>
+              )}
               
               <p className="text-center text-xs text-muted-foreground mt-3">
                 {isListening 
                   ? 'Listening... Speak now' 
                   : isProcessing 
-                    ? 'Processing...' 
-                    : 'Tap to speak'}
+                    ? 'Processing your request...' 
+                    : isSpeaking
+                      ? 'Speaking response...'
+                      : 'Tap to speak'}
               </p>
             </div>
           </div>
@@ -342,4 +367,3 @@ export const VoiceAgent = () => {
     </>
   );
 };
-
