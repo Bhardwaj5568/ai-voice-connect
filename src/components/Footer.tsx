@@ -20,16 +20,6 @@ const footerLinks = {
       { label: "Contact", href: "#contact", isExternal: true },
     ],
   },
-  resources: {
-    title: "Resources",
-    links: [
-      { label: "Documentation", href: "#", isExternal: true },
-      { label: "Blog", href: "#", isExternal: true },
-      { label: "Case Studies", href: "#case-studies", isExternal: true },
-      { label: "Webinars", href: "#", isExternal: true },
-      { label: "Help Center", href: "#faq", isExternal: true },
-    ],
-  },
   legal: {
     title: "Legal",
     links: [
