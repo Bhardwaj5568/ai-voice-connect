@@ -1,5 +1,7 @@
-import { Phone, Mail, Linkedin, Twitter, Instagram, Youtube, Globe, ArrowRight } from "lucide-react";
+import { Phone, Mail, MessageCircle, Globe, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+
+const WHATSAPP_NUMBER = "918386802004";
 
 const footerLinks = {
   products: {
@@ -32,13 +34,6 @@ const footerLinks = {
   },
 };
 
-const socialLinks = [
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Youtube, href: "#", label: "YouTube" },
-];
-
 
 export const Footer = () => {
   return (
@@ -60,18 +55,17 @@ export const Footer = () => {
               Trusted by 500+ companies worldwide to deliver exceptional experiences at scale.
             </p>
             
-            {/* Social Links */}
+            {/* WhatsApp Link */}
             <div className="flex gap-3 mb-8">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  aria-label={social.label}
-                  className="w-10 h-10 rounded-xl bg-muted/50 hover:bg-primary/20 hover:text-primary border border-border/50 flex items-center justify-center text-muted-foreground transition-all duration-300 hover:scale-110"
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="w-10 h-10 rounded-xl bg-green-500/20 hover:bg-green-500/30 hover:text-green-500 border border-green-500/30 flex items-center justify-center text-green-500 transition-all duration-300 hover:scale-110"
+              >
+                <MessageCircle className="w-5 h-5" />
+              </a>
             </div>
 
             {/* Remote First */}
