@@ -1,46 +1,47 @@
 import { Phone, Mail, Linkedin, Twitter, Instagram, Youtube, MapPin, Send, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const footerLinks = {
   products: {
     title: "Products",
     links: [
-      { label: "Voice AI Agents", href: "#services" },
-      { label: "Call Analytics", href: "#" },
-      { label: "CRM Integration", href: "#integrations" },
-      { label: "API Access", href: "#" },
-      { label: "Enterprise Suite", href: "#pricing" },
+      { label: "Voice AI Agents", href: "#services", isExternal: true },
+      { label: "Call Analytics", href: "#", isExternal: true },
+      { label: "CRM Integration", href: "#integrations", isExternal: true },
+      { label: "API Access", href: "#", isExternal: true },
+      { label: "Enterprise Suite", href: "#pricing", isExternal: true },
     ],
   },
   company: {
     title: "Company",
     links: [
-      { label: "About Us", href: "#about" },
-      { label: "Careers", href: "#" },
-      { label: "Press Kit", href: "#" },
-      { label: "Partners", href: "#" },
-      { label: "Contact", href: "#contact" },
+      { label: "About Us", href: "#about", isExternal: true },
+      { label: "Careers", href: "#", isExternal: true },
+      { label: "Press Kit", href: "#", isExternal: true },
+      { label: "Partners", href: "#", isExternal: true },
+      { label: "Contact", href: "#contact", isExternal: true },
     ],
   },
   resources: {
     title: "Resources",
     links: [
-      { label: "Documentation", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Case Studies", href: "#case-studies" },
-      { label: "Webinars", href: "#" },
-      { label: "Help Center", href: "#faq" },
+      { label: "Documentation", href: "#", isExternal: true },
+      { label: "Blog", href: "#", isExternal: true },
+      { label: "Case Studies", href: "#case-studies", isExternal: true },
+      { label: "Webinars", href: "#", isExternal: true },
+      { label: "Help Center", href: "#faq", isExternal: true },
     ],
   },
   legal: {
     title: "Legal",
     links: [
-      { label: "Privacy Policy", href: "#" },
-      { label: "Terms of Service", href: "#" },
-      { label: "Cookie Policy", href: "#" },
-      { label: "GDPR Compliance", href: "#" },
-      { label: "Security", href: "#" },
+      { label: "Privacy Policy", href: "/privacy-policy", isExternal: false },
+      { label: "Terms of Service", href: "/terms-of-service", isExternal: false },
+      { label: "Cookie Policy", href: "/cookie-policy", isExternal: false },
+      { label: "GDPR Compliance", href: "/gdpr-compliance", isExternal: false },
+      { label: "Security", href: "/security", isExternal: false },
     ],
   },
 };
@@ -171,13 +172,23 @@ export const Footer = () => {
               <ul className="space-y-3">
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 flex items-center gap-1 group"
-                    >
-                      {link.label}
-                      <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
-                    </a>
+                    {link.isExternal ? (
+                      <a
+                        href={link.href}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 flex items-center gap-1 group"
+                      >
+                        {link.label}
+                        <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                      </a>
+                    ) : (
+                      <Link
+                        to={link.href}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 flex items-center gap-1 group"
+                      >
+                        {link.label}
+                        <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
