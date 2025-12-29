@@ -22,13 +22,21 @@ import { Footer } from "@/components/Footer";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { VoiceAgent } from "@/components/VoiceAgent";
 import { ScrollProgress } from "@/components/ScrollProgress";
+import { CaseStudiesSection } from "@/components/CaseStudiesSection";
+import { PressSection } from "@/components/PressSection";
+import { LiveActivityFeed } from "@/components/LiveActivityFeed";
+import { LoadingSplash } from "@/components/LoadingSplash";
+import { ParallaxBackground } from "@/components/ParallaxBackground";
+import { ComparisonSlider } from "@/components/ComparisonSlider";
 
 const Scene3D = lazy(() => import("@/components/Scene3D").then(m => ({ default: m.Scene3D })));
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      <LoadingSplash />
       <ScrollProgress />
+      <ParallaxBackground />
       
       {/* 3D Background */}
       <Suspense fallback={null}>
@@ -44,10 +52,13 @@ const Index = () => {
         <SolutionSection />
         <ProductShowcase3D />
         <HowItWorksSection />
+        <ComparisonSlider />
         <IndustriesSection />
         <ServicesSection />
         <IntegrationsSection />
+        <CaseStudiesSection />
         <TestimonialsSection />
+        <PressSection />
         <ROICalculator />
         <PricingSection />
         <TrustSection />
@@ -59,6 +70,7 @@ const Index = () => {
       <Footer />
       <FloatingWhatsApp />
       <VoiceAgent />
+      <LiveActivityFeed />
     </div>
   );
 };
