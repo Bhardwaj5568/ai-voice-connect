@@ -1,6 +1,4 @@
-import { Phone, Mail, Linkedin, Twitter, Instagram, Youtube, Globe, Send, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { Phone, Mail, Linkedin, Twitter, Instagram, Youtube, Globe, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const footerLinks = {
@@ -53,63 +51,8 @@ const socialLinks = [
 
 
 export const Footer = () => {
-  const [email, setEmail] = useState("");
-  const [isSubscribed, setIsSubscribed] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setIsSubscribed(true);
-      setEmail("");
-      setTimeout(() => setIsSubscribed(false), 3000);
-    }
-  };
-
   return (
     <footer className="relative bg-gradient-to-b from-background to-muted/30 border-t border-border/30">
-      {/* Newsletter Section */}
-      <div className="border-b border-border/30">
-        <div className="container mx-auto px-4 py-12">
-          <div className="glass-card rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="text-center md:text-left">
-              <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-2">
-                Stay ahead of the curve
-              </h3>
-              <p className="text-muted-foreground">
-                Get the latest AI voice technology insights delivered to your inbox.
-              </p>
-            </div>
-            <form onSubmit={handleSubscribe} className="flex w-full md:w-auto gap-3">
-              <div className="relative flex-1 md:w-72">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full h-12 pl-12 pr-4 rounded-xl bg-background/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                />
-              </div>
-              <Button 
-                type="submit" 
-                variant="hero" 
-                size="lg"
-                className="shrink-0"
-              >
-                {isSubscribed ? (
-                  <span className="flex items-center gap-2">
-                    <span className="text-success">✓</span> Subscribed!
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Subscribe <Send className="w-4 h-4" />
-                  </span>
-                )}
-              </Button>
-            </form>
-          </div>
-        </div>
-      </div>
 
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 py-16">
