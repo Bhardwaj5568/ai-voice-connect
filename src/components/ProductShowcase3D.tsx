@@ -351,33 +351,6 @@ export const ProductShowcase3D = () => {
               </Suspense>
             </Canvas>
 
-            {/* Controls overlay */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleZoomIn}
-                className="bg-background/80 backdrop-blur-sm border-border/50 hover:bg-background"
-              >
-                <ZoomIn className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleReset}
-                className="bg-background/80 backdrop-blur-sm border-border/50 hover:bg-background"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleZoomOut}
-                className="bg-background/80 backdrop-blur-sm border-border/50 hover:bg-background"
-              >
-                <ZoomOut className="w-4 h-4" />
-              </Button>
-            </div>
 
             {/* Product indicator dots */}
             <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2">
