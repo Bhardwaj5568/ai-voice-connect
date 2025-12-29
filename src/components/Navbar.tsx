@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, Phone } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { CommandPalette } from "@/components/CommandPalette";
+import { MagneticButton } from "@/components/MagneticButton";
 
 const WHATSAPP_LINK = "https://wa.me/917792848355?text=Hi%2C%20I%27m%20interested%20in%20AI%20Voice%20Calling%20solutions%20for%20my%20business.";
 
@@ -37,12 +39,15 @@ export const Navbar = () => {
                 {link.label}
               </a>
             ))}
+            <CommandPalette />
             <ThemeToggle />
-            <Button asChild variant="hero" size="default">
-              <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">
-                Request Demo
-              </a>
-            </Button>
+            <MagneticButton>
+              <Button asChild variant="hero" size="default">
+                <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">
+                  Request Demo
+                </a>
+              </Button>
+            </MagneticButton>
           </div>
 
           {/* Mobile Controls */}
