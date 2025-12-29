@@ -1,4 +1,4 @@
-import { Phone, Mail, Linkedin, Twitter, Instagram, Youtube, MapPin, Send, ArrowRight } from "lucide-react";
+import { Phone, Mail, Linkedin, Twitter, Instagram, Youtube, Globe, Send, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -46,19 +46,13 @@ const footerLinks = {
   },
 };
 
-const offices = [
-  { city: "San Francisco", country: "USA" },
-  { city: "London", country: "UK" },
-  { city: "Mumbai", country: "India" },
-  { city: "Singapore", country: "SG" },
-];
-
 const socialLinks = [
   { icon: Linkedin, href: "#", label: "LinkedIn" },
   { icon: Twitter, href: "#", label: "Twitter" },
   { icon: Instagram, href: "#", label: "Instagram" },
   { icon: Youtube, href: "#", label: "YouTube" },
 ];
+
 
 export const Footer = () => {
   const [email, setEmail] = useState("");
@@ -149,19 +143,15 @@ export const Footer = () => {
               ))}
             </div>
 
-            {/* Global Offices */}
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-primary" />
-                Global Offices
+            {/* Remote First */}
+            <div className="p-4 bg-muted/30 rounded-xl border border-border/50">
+              <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-primary" />
+                100% Remote
               </h4>
-              <div className="grid grid-cols-2 gap-2">
-                {offices.map((office) => (
-                  <span key={office.city} className="text-xs text-muted-foreground">
-                    {office.city}, {office.country}
-                  </span>
-                ))}
-              </div>
+              <p className="text-xs text-muted-foreground">
+                We operate fully online, serving clients worldwide with our distributed team.
+              </p>
             </div>
           </div>
 
