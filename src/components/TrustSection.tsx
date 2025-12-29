@@ -1,4 +1,5 @@
 import { MessageSquare, Clock, Plug, Globe } from "lucide-react";
+import { ScrollReveal, ScrollRevealGroup } from "@/components/ScrollReveal";
 
 const trustFactors = [
   {
@@ -29,21 +30,22 @@ export const TrustSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+        <ScrollReveal variant="fade-up" className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
             Why Businesses Trust Us
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Reliable, scalable, and designed for enterprise-grade performance.
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {trustFactors.map((factor, index) => (
-            <div
-              key={factor.title}
-              className="text-center group"
-            >
+        <ScrollRevealGroup
+          variant="fade-up"
+          staggerDelay={100}
+          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          {trustFactors.map((factor) => (
+            <div key={factor.title} className="text-center group">
               <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/10 to-cyan-500/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:glow-sm transition-all duration-300">
                 <factor.icon className="w-10 h-10 text-primary" />
               </div>
@@ -51,7 +53,7 @@ export const TrustSection = () => {
               <p className="text-muted-foreground text-sm">{factor.description}</p>
             </div>
           ))}
-        </div>
+        </ScrollRevealGroup>
       </div>
     </section>
   );

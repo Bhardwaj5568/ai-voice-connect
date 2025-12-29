@@ -1,4 +1,5 @@
 import { AlertTriangle, DollarSign, Clock, TrendingDown, PhoneOff } from "lucide-react";
+import { ScrollReveal, ScrollRevealGroup } from "@/components/ScrollReveal";
 
 const problems = [
   {
@@ -29,25 +30,28 @@ export const ProblemSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
+        <ScrollReveal variant="fade-up" className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-6">
             <AlertTriangle className="w-4 h-4 text-orange-400" />
             <span className="text-sm text-muted-foreground">The Challenge</span>
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
             What Problem Does This Solve?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Traditional phone operations are expensive, unreliable, and can't scale.
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {problems.map((problem, index) => (
+        <ScrollRevealGroup
+          variant="fade-up"
+          staggerDelay={100}
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          {problems.map((problem) => (
             <div
               key={problem.title}
               className="glass-card rounded-2xl p-6 hover:border-primary/30 transition-all duration-300 group"
-              style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4 group-hover:bg-orange-500/20 transition-colors">
                 <problem.icon className="w-6 h-6 text-orange-400" />
@@ -56,14 +60,14 @@ export const ProblemSection = () => {
               <p className="text-muted-foreground text-sm">{problem.description}</p>
             </div>
           ))}
-        </div>
+        </ScrollRevealGroup>
 
-        <div className="mt-12 text-center">
+        <ScrollReveal variant="fade-up" delay={400} className="mt-12 text-center">
           <p className="text-lg text-foreground">
             <span className="text-primary font-semibold">The solution?</span> AI voice agents that maintain natural, 
             human-like conversations at scale.
           </p>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

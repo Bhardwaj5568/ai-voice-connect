@@ -1,4 +1,5 @@
 import { CheckCircle, Zap, Bot, Calendar, Bell, Database } from "lucide-react";
+import { ScrollReveal, ScrollRevealGroup } from "@/components/ScrollReveal";
 
 const capabilities = [
   {
@@ -37,21 +38,25 @@ export const SolutionSection = () => {
   return (
     <section className="py-24 relative">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <ScrollReveal variant="fade-up" className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-6">
             <Zap className="w-4 h-4 text-primary" />
             <span className="text-sm text-muted-foreground">The Solution</span>
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
             How AI Voice Agents Help
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Reliability, speed, and scalability without increasing your headcount.
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {capabilities.map((capability, index) => (
+        <ScrollRevealGroup
+          variant="fade-up"
+          staggerDelay={80}
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {capabilities.map((capability) => (
             <div
               key={capability.title}
               className="glass-card rounded-2xl p-6 hover:border-primary/30 hover:glow-sm transition-all duration-300 group"
@@ -63,39 +68,41 @@ export const SolutionSection = () => {
               <p className="text-muted-foreground text-sm">{capability.description}</p>
             </div>
           ))}
-        </div>
+        </ScrollRevealGroup>
 
         {/* Value Proposition */}
-        <div className="mt-16 glass-card rounded-3xl p-8 md:p-12">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-                Why Choose an Agency Over Software?
-              </h3>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">No need for custom software development time or funding</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">Focus on execution and business outcomes, not tech</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">Ready-to-use solutions without technical complexity</span>
-                </li>
-              </ul>
-            </div>
-            <div className="text-center md:text-right">
-              <div className="inline-block">
-                <div className="text-5xl md:text-6xl font-bold text-gradient mb-2">Pay for</div>
-                <div className="text-4xl md:text-5xl font-bold text-foreground">Results</div>
-                <p className="text-muted-foreground mt-4">Not tools. Not seats. Just outcomes.</p>
+        <ScrollReveal variant="zoom-in" delay={200} className="mt-16">
+          <div className="glass-card rounded-3xl p-8 md:p-12">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-4">
+                  Why Choose an Agency Over Software?
+                </h3>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                    <span className="text-muted-foreground">No need for custom software development time or funding</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                    <span className="text-muted-foreground">Focus on execution and business outcomes, not tech</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                    <span className="text-muted-foreground">Ready-to-use solutions without technical complexity</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="text-center md:text-right">
+                <div className="inline-block">
+                  <div className="text-5xl md:text-6xl font-display font-bold text-gradient mb-2">Pay for</div>
+                  <div className="text-4xl md:text-5xl font-display font-bold text-foreground">Results</div>
+                  <p className="text-muted-foreground mt-4">Not tools. Not seats. Just outcomes.</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );
