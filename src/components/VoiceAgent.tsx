@@ -529,37 +529,14 @@ export const VoiceAgent = () => {
               </Button>
             </div>
 
-            {/* Status Bar */}
+            {/* Status Bar - Visual indicator only */}
             <div className="flex items-center justify-center p-4 border-t border-border/50 bg-gradient-to-r from-primary/5 to-cyan-500/5">
-              <div className="text-center space-y-2">
-                <div className="flex items-center justify-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${
-                    isListening ? 'bg-red-500 animate-pulse' : 
-                    isSpeaking ? 'bg-green-500 animate-pulse' : 
-                    isProcessing ? 'bg-orange-500 animate-pulse' : 
-                    'bg-primary'
-                  }`} />
-                  <span className="font-medium text-foreground">
-                    {isListening && interimTranscript ? 'Hearing you...' :
-                     isListening ? 'Listening...' : 
-                     isSpeaking ? 'Speaking...' : 
-                     isProcessing ? 'Thinking...' : 
-                     'Ready'}
-                  </span>
-                </div>
-                
-                {/* Show interim transcript for real-time feedback */}
-                {interimTranscript && (
-                  <div className="text-xs text-muted-foreground/70 italic max-w-xs truncate">
-                    "{interimTranscript}"
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                  <Globe className="w-3 h-3" />
-                  <span>{detectedLanguage}</span>
-                </div>
-              </div>
+              <div className={`w-4 h-4 rounded-full ${
+                isListening ? 'bg-red-500 animate-pulse' : 
+                isSpeaking ? 'bg-green-500 animate-pulse' : 
+                isProcessing ? 'bg-orange-500 animate-pulse' : 
+                'bg-primary'
+              }`} />
             </div>
 
             {/* Audio Visualization */}
@@ -577,29 +554,10 @@ export const VoiceAgent = () => {
                     <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                     <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Speak naturally — I'm always listening
-                  </p>
-                )}
+                ) : null}
               </div>
-              
-              {/* Latest message preview */}
-              {messages.length > 0 && (
-                <div className="mt-4 p-3 rounded-xl bg-background/50 border border-border/30">
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {messages[messages.length - 1].content}
-                  </p>
-                </div>
-              )}
             </div>
 
-            {/* Footer */}
-            <div className="p-4 text-center border-t border-border/30">
-              <p className="text-xs text-muted-foreground">
-                Tap <X className="inline w-3 h-3" /> to end conversation
-              </p>
-            </div>
           </div>
         </div>
       )}
