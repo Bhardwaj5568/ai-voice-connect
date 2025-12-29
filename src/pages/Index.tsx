@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { ProblemSection } from "@/components/ProblemSection";
@@ -9,10 +10,18 @@ import { FounderSection } from "@/components/FounderSection";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { Footer } from "@/components/Footer";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
+import { VoiceAgent } from "@/components/VoiceAgent";
+
+const Scene3D = lazy(() => import("@/components/Scene3D").then(m => ({ default: m.Scene3D })));
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      {/* 3D Background */}
+      <Suspense fallback={null}>
+        <Scene3D />
+      </Suspense>
+      
       <Navbar />
       <main>
         <HeroSection />
@@ -26,6 +35,7 @@ const Index = () => {
       </main>
       <Footer />
       <FloatingWhatsApp />
+      <VoiceAgent />
     </div>
   );
 };
