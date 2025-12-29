@@ -1,26 +1,100 @@
 import { useEffect, useState } from "react";
 import { MapPin, Phone, Calendar, CheckCircle } from "lucide-react";
 
-const activities = [
-  { name: "John", city: "New York", action: "scheduled a demo", icon: Calendar },
-  { name: "Sarah", city: "London", action: "started a free trial", icon: CheckCircle },
-  { name: "Michael", city: "Singapore", action: "upgraded to Enterprise", icon: CheckCircle },
-  { name: "Emily", city: "San Francisco", action: "scheduled a demo", icon: Calendar },
-  { name: "David", city: "Mumbai", action: "completed onboarding", icon: CheckCircle },
-  { name: "Lisa", city: "Berlin", action: "requested a callback", icon: Phone },
-  { name: "James", city: "Toronto", action: "scheduled a demo", icon: Calendar },
-  { name: "Anna", city: "Sydney", action: "started a free trial", icon: CheckCircle },
+const names = [
+  // North America
+  "James", "Emily", "Michael", "Sarah", "David", "Jessica", "Christopher", "Ashley",
+  // Europe
+  "Liam", "Emma", "Oliver", "Sophie", "Lucas", "Isabella", "Matteo", "Giulia",
+  "Hans", "Ingrid", "Pierre", "Camille", "Andrei", "Elena", "Sven", "Astrid",
+  // Asia
+  "Hiroshi", "Yuki", "Wei", "Mei", "Raj", "Priya", "Jin", "Soo-Min",
+  "Arjun", "Ananya", "Kenji", "Sakura", "Chen", "Li Na", "Vikram", "Deepa",
+  // Middle East
+  "Omar", "Fatima", "Khalid", "Layla", "Ahmed", "Noor", "Hassan", "Mariam",
+  // Latin America
+  "Carlos", "Maria", "Diego", "Valentina", "Mateo", "Camila", "Santiago", "Lucia",
+  // Africa
+  "Kwame", "Amina", "Kofi", "Zara", "Tendai", "Aisha", "Oluwaseun", "Nkechi",
+  // Oceania
+  "Jack", "Charlotte", "William", "Olivia", "Lachlan", "Mia", "Ethan", "Ava",
 ];
 
-const getRandomTime = () => {
+const locations = [
+  // North America
+  { city: "New York", country: "USA" },
+  { city: "Los Angeles", country: "USA" },
+  { city: "Toronto", country: "Canada" },
+  { city: "Chicago", country: "USA" },
+  { city: "Vancouver", country: "Canada" },
+  { city: "Miami", country: "USA" },
+  { city: "Mexico City", country: "Mexico" },
+  // Europe
+  { city: "London", country: "UK" },
+  { city: "Paris", country: "France" },
+  { city: "Berlin", country: "Germany" },
+  { city: "Amsterdam", country: "Netherlands" },
+  { city: "Stockholm", country: "Sweden" },
+  { city: "Madrid", country: "Spain" },
+  { city: "Milan", country: "Italy" },
+  { city: "Dublin", country: "Ireland" },
+  { city: "Zurich", country: "Switzerland" },
+  // Asia
+  { city: "Singapore", country: "Singapore" },
+  { city: "Tokyo", country: "Japan" },
+  { city: "Mumbai", country: "India" },
+  { city: "Hong Kong", country: "China" },
+  { city: "Seoul", country: "South Korea" },
+  { city: "Bangalore", country: "India" },
+  { city: "Shanghai", country: "China" },
+  { city: "Dubai", country: "UAE" },
+  // Latin America
+  { city: "São Paulo", country: "Brazil" },
+  { city: "Buenos Aires", country: "Argentina" },
+  { city: "Bogotá", country: "Colombia" },
+  { city: "Santiago", country: "Chile" },
+  // Africa
+  { city: "Lagos", country: "Nigeria" },
+  { city: "Cape Town", country: "South Africa" },
+  { city: "Nairobi", country: "Kenya" },
+  { city: "Cairo", country: "Egypt" },
+  // Oceania
+  { city: "Sydney", country: "Australia" },
+  { city: "Melbourne", country: "Australia" },
+  { city: "Auckland", country: "New Zealand" },
+];
+
+const actions = [
+  { text: "scheduled a demo", icon: Calendar },
+  { text: "started a free trial", icon: CheckCircle },
+  { text: "upgraded to Enterprise", icon: CheckCircle },
+  { text: "completed onboarding", icon: CheckCircle },
+  { text: "requested a callback", icon: Phone },
+  { text: "booked a consultation", icon: Calendar },
+  { text: "joined the waitlist", icon: CheckCircle },
+];
+
+const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+const generateActivity = () => {
+  const name = getRandomItem(names);
+  const location = getRandomItem(locations);
+  const action = getRandomItem(actions);
   const mins = Math.floor(Math.random() * 15) + 1;
-  return `${mins} min ago`;
+  
+  return {
+    name,
+    city: location.city,
+    country: location.country,
+    action: action.text,
+    icon: action.icon,
+    time: `${mins} min ago`,
+  };
 };
 
 export const LiveActivityFeed = () => {
-  const [currentActivity, setCurrentActivity] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [displayedActivity, setDisplayedActivity] = useState(activities[0]);
+  const [displayedActivity, setDisplayedActivity] = useState(generateActivity);
 
   useEffect(() => {
     // Initial delay before showing first notification
@@ -40,15 +114,13 @@ export const LiveActivityFeed = () => {
       
       // After hide animation, update and show next
       setTimeout(() => {
-        const nextIndex = (currentActivity + 1) % activities.length;
-        setCurrentActivity(nextIndex);
-        setDisplayedActivity(activities[nextIndex]);
+        setDisplayedActivity(generateActivity());
         setIsVisible(true);
       }, 500);
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [currentActivity, isVisible]);
+  }, [isVisible]);
 
   const activity = displayedActivity;
   const Icon = activity.icon;
@@ -72,12 +144,12 @@ export const LiveActivityFeed = () => {
               {" from "}
               <span className="inline-flex items-center gap-1">
                 <MapPin className="w-3 h-3 text-primary" />
-                {activity.city}
+                {activity.city}, {activity.country}
               </span>
               {" "}
               {activity.action}
             </p>
-            <span className="text-xs text-muted-foreground">{getRandomTime()}</span>
+            <span className="text-xs text-muted-foreground">{activity.time}</span>
           </div>
         </div>
         
