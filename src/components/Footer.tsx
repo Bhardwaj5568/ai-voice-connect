@@ -18,7 +18,6 @@ const footerLinks = {
     title: "Company",
     links: [
       { label: "About Us", href: "#about", isExternal: true },
-      { label: "Careers", href: "#", isExternal: true },
       { label: "Press Kit", href: "#", isExternal: true },
       { label: "Partners", href: "#", isExternal: true },
       { label: "Contact", href: "#contact", isExternal: true },

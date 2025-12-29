@@ -20,7 +20,7 @@ import { FounderSection } from "@/components/FounderSection";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { Footer } from "@/components/Footer";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
-import { VoiceAgent } from "@/components/VoiceAgent";
+
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { CaseStudiesSection } from "@/components/CaseStudiesSection";
 import { PressSection } from "@/components/PressSection";
@@ -109,7 +109,7 @@ const Index = () => {
       </main>
       <Footer />
       <FloatingWhatsApp />
-      <VoiceAgent />
+      
       <LiveActivityFeed />
     </div>
   );
