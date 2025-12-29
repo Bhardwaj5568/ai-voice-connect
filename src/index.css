@@ -56,6 +56,48 @@
     --warning-foreground: 222 47% 4%;
   }
 
+  .light {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 199 89% 42%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 20% 45%;
+
+    --accent: 280 70% 55%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 199 89% 42%;
+
+    /* Enterprise Design Tokens - Light */
+    --glow-primary: 199 89% 42%;
+    --glow-accent: 280 70% 55%;
+    --glass-bg: 0 0% 100%;
+    --glass-border: 214 32% 91%;
+    
+    /* Success/Warning colors */
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 11%;
+  }
+
   .dark {
     --background: 222 47% 4%;
     --foreground: 210 40% 98%;
@@ -81,7 +123,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-300;
   }
 
   html {
@@ -89,7 +131,7 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased transition-colors duration-500;
     font-family: 'Outfit', sans-serif;
   }
 

@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, Phone } from "lucide-react";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const WHATSAPP_LINK = "https://wa.me/917792848355?text=Hi%2C%20I%27m%20interested%20in%20AI%20Voice%20Calling%20solutions%20for%20my%20business.";
 
 const navLinks = [
   { label: "Services", href: "#services" },
   { label: "Industries", href: "#industries" },
+  { label: "Pricing", href: "#pricing" },
   { label: "About", href: "#about" },
 ];
 
@@ -14,18 +16,18 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/30">
+    <nav className="fixed top-0 left-0 right-0 z-40 glass border-b border-border/30 mt-0">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <a href="#" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center">
               <Phone className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold text-foreground">AIVocal</span>
+            <span className="text-lg font-display font-bold text-foreground">AIVocal</span>
           </a>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <a
                 key={link.label}
@@ -35,6 +37,7 @@ export const Navbar = () => {
                 {link.label}
               </a>
             ))}
+            <ThemeToggle />
             <Button asChild variant="hero" size="default">
               <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">
                 Request Demo
@@ -42,13 +45,16 @@ export const Navbar = () => {
             </Button>
           </div>
 
-          {/* Mobile Toggle */}
-          <button
-            className="md:hidden text-foreground"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile Controls */}
+          <div className="flex md:hidden items-center gap-2">
+            <ThemeToggle />
+            <button
+              className="text-foreground p-2"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Nav */}
