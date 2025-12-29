@@ -62,23 +62,33 @@ interface Message {
   language?: string;
 }
 
-// Split long text into speakable chunks for smoother TTS
-const splitIntoChunks = (text: string, maxLength: number = 150): string[] => {
-  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
-  const chunks: string[] = [];
-  let currentChunk = '';
+// Confidence threshold for speech recognition
+const CONFIDENCE_THRESHOLD = 0.6;
 
+// Split text at natural sentence boundaries for smoother TTS
+const splitIntoChunks = (text: string): string[] => {
+  // Split by sentence-ending punctuation while keeping the punctuation
+  const sentences = text.match(/[^.!?]*[.!?]+\s*/g) || [text];
+  const chunks: string[] = [];
+  
   for (const sentence of sentences) {
-    if ((currentChunk + sentence).length <= maxLength) {
-      currentChunk += sentence;
-    } else {
-      if (currentChunk) chunks.push(currentChunk.trim());
-      currentChunk = sentence;
+    const trimmed = sentence.trim();
+    if (trimmed) {
+      chunks.push(trimmed);
     }
   }
-  if (currentChunk) chunks.push(currentChunk.trim());
   
-  return chunks;
+  // If no sentences found, return the whole text
+  return chunks.length > 0 ? chunks : [text.trim()];
+};
+
+// Add natural pauses between sentences for prosody
+const addProsodyPauses = (text: string): string => {
+  // Add slight pause markers that TTS can interpret
+  return text
+    .replace(/([.!?])\s+/g, '$1  ') // Double space after sentence endings
+    .replace(/,\s*/g, ', ') // Ensure comma pauses
+    .replace(/;\s*/g, '; '); // Ensure semicolon pauses
 };
 
 export const VoiceAgent = () => {
@@ -92,11 +102,14 @@ export const VoiceAgent = () => {
   const [detectedLanguage, setDetectedLanguage] = useState<string>('English');
   const [emotion, setEmotion] = useState<AvatarEmotion>('neutral');
   const [isGreeting, setIsGreeting] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState<string>('');
   
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
   const isActiveRef = useRef(false);
   const speechQueueRef = useRef<string[]>([]);
   const isSpeakingRef = useRef(false);
+  const currentLanguageRef = useRef<string>('en-US');
+  const lastProcessedRef = useRef<string>('');
 
   // Language mapping for speech synthesis
   const languageVoiceMap: Record<string, string> = {
@@ -163,11 +176,21 @@ export const VoiceAgent = () => {
     const recognition = new SpeechRecognitionAPI();
     
     recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
+    recognition.interimResults = true; // Enable real-time feedback
+    recognition.lang = currentLanguageRef.current;
     
     return recognition;
   }, [toast]);
+
+  // Update recognition language dynamically
+  const updateRecognitionLanguage = useCallback((language: string) => {
+    const langCode = languageVoiceMap[language.toLowerCase()] || 'en-US';
+    currentLanguageRef.current = langCode;
+    
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = langCode;
+    }
+  }, []);
 
   // Process speech queue - speak chunks one by one
   const processSpeechQueue = useCallback(() => {
@@ -190,12 +213,16 @@ export const VoiceAgent = () => {
     isSpeakingRef.current = true;
     setIsSpeaking(true);
     
-    const text = speechQueueRef.current.shift()!;
+    const rawText = speechQueueRef.current.shift()!;
+    const text = addProsodyPauses(rawText); // Add natural pauses
     const langCode = languageVoiceMap[detectedLanguage.toLowerCase()] || 'en-US';
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = langCode;
-    utterance.rate = 1.1; // Slightly faster for more natural feel
+    
+    // Adjust rate based on language for natural feel
+    const isAsianLanguage = ['zh-CN', 'ja-JP', 'ko-KR'].includes(langCode);
+    utterance.rate = isAsianLanguage ? 0.95 : 1.05; // Slightly slower for tonal languages
     utterance.pitch = 1;
     utterance.volume = 1;
     
@@ -211,7 +238,8 @@ export const VoiceAgent = () => {
     
     utterance.onend = () => {
       isSpeakingRef.current = false;
-      processSpeechQueue(); // Process next chunk
+      // Small delay between sentences for natural pacing
+      setTimeout(() => processSpeechQueue(), 150);
     };
     
     utterance.onerror = () => {
@@ -264,6 +292,7 @@ export const VoiceAgent = () => {
       const detectedLang = data.language || 'English';
       
       setDetectedLanguage(detectedLang);
+      updateRecognitionLanguage(detectedLang); // Update recognition language dynamically
       
       setMessages(prev => [...prev, { 
         role: 'assistant', 
@@ -308,12 +337,33 @@ export const VoiceAgent = () => {
     };
 
     recognition.onresult = (event) => {
-      const lastResultIndex = event.results.length - 1;
-      const transcript = event.results[lastResultIndex][0].transcript;
+      let finalTranscript = '';
+      let interimText = '';
       
-      if (transcript.trim()) {
-        setMessages(prev => [...prev, { role: 'user', content: transcript }]);
-        processWithAI(transcript);
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        const transcript = result[0].transcript;
+        const confidence = result[0].confidence;
+        
+        if (result.isFinal) {
+          // Only accept transcripts above confidence threshold
+          if (confidence >= CONFIDENCE_THRESHOLD || confidence === 0) { // confidence 0 means not provided
+            finalTranscript += transcript;
+          }
+        } else {
+          interimText += transcript;
+        }
+      }
+      
+      // Show interim results for real-time feedback
+      setInterimTranscript(interimText);
+      
+      // Process final transcript if we have one and it's different from last
+      if (finalTranscript.trim() && finalTranscript.trim() !== lastProcessedRef.current) {
+        lastProcessedRef.current = finalTranscript.trim();
+        setInterimTranscript(''); // Clear interim
+        setMessages(prev => [...prev, { role: 'user', content: finalTranscript.trim() }]);
+        processWithAI(finalTranscript.trim());
       }
     };
 
@@ -490,12 +540,20 @@ export const VoiceAgent = () => {
                     'bg-primary'
                   }`} />
                   <span className="font-medium text-foreground">
-                    {isListening ? 'Listening...' : 
+                    {isListening && interimTranscript ? 'Hearing you...' :
+                     isListening ? 'Listening...' : 
                      isSpeaking ? 'Speaking...' : 
                      isProcessing ? 'Thinking...' : 
                      'Ready'}
                   </span>
                 </div>
+                
+                {/* Show interim transcript for real-time feedback */}
+                {interimTranscript && (
+                  <div className="text-xs text-muted-foreground/70 italic max-w-xs truncate">
+                    "{interimTranscript}"
+                  </div>
+                )}
                 
                 <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
                   <Globe className="w-3 h-3" />
