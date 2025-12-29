@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_knowledge: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_active: boolean
+          priority: number
+          section_key: string
+          section_title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          priority?: number
+          section_key: string
+          section_title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          priority?: number
+          section_key?: string
+          section_title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
