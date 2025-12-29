@@ -6,8 +6,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Fetch dynamic knowledge from database
+// In-memory cache for knowledge base
+let knowledgeCache: { data: string; timestamp: number } | null = null;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache
+
+// Fetch dynamic knowledge from database with caching
 async function getKnowledgeBase(): Promise<string> {
+  // Check cache first
+  if (knowledgeCache && (Date.now() - knowledgeCache.timestamp) < CACHE_TTL_MS) {
+    console.log('Using cached knowledge base');
+    return knowledgeCache.data;
+  }
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   
@@ -41,6 +51,8 @@ async function getKnowledgeBase(): Promise<string> {
       knowledge += `## ${item.section_title}\n${item.content}\n\n`;
     }
     
+    // Cache the result
+    knowledgeCache = { data: knowledge, timestamp: Date.now() };
     console.log(`Loaded ${data.length} knowledge sections from database`);
     return knowledge;
   } catch (e) {
@@ -80,26 +92,48 @@ AIVocal.online is an AI Voice Calling Agency based in Jaipur, Rajasthan, India. 
 `;
 }
 
-function buildSystemPrompt(knowledge: string): string {
-  return `You are the AI assistant for AIVocal.online, an AI Voice Calling Agency. You are multilingual and can respond in any language the user speaks.
+// Detect language from user message
+function detectLanguage(text: string): string {
+  // Hindi detection (Devanagari script or common Hindi romanized patterns)
+  if (/[\u0900-\u097F]/.test(text)) return 'Hindi';
+  if (/\b(kya|hai|mein|aur|ke|ki|ko|se|ka|yeh|tum|aap|hum|kaise|kab|kahan|kyun|kuch|bahut|achha|theek|nahi|haan|bhai|behen|ji)\b/i.test(text)) return 'Hindi';
+  
+  // Spanish detection
+  if (/\b(hola|como|estas|que|donde|cuando|por|para|gracias|buenos|buenas|dias|noches|tardes)\b/i.test(text)) return 'Spanish';
+  
+  // French detection
+  if (/\b(bonjour|comment|allez|vous|merci|bien|tres|oui|non|je|tu|nous|avec)\b/i.test(text)) return 'French';
+  
+  // German detection
+  if (/\b(guten|tag|morgen|danke|bitte|wie|geht|ich|du|sie|wir|sind|haben)\b/i.test(text)) return 'German';
+  
+  // Arabic detection
+  if (/[\u0600-\u06FF]/.test(text)) return 'Arabic';
+  
+  // Chinese detection
+  if (/[\u4E00-\u9FFF]/.test(text)) return 'Chinese';
+  
+  // Japanese detection
+  if (/[\u3040-\u30FF]/.test(text)) return 'Japanese';
+  
+  // Korean detection
+  if (/[\uAC00-\uD7AF]/.test(text)) return 'Korean';
+  
+  return 'English';
+}
 
-IMPORTANT INSTRUCTIONS:
-1. DETECT the language of the user's message and RESPOND IN THE SAME LANGUAGE
-2. Be helpful, friendly, and professional
-3. Use the knowledge base below to answer questions about AIVocal.online
-4. If asked about pricing, mention that they should contact us via WhatsApp at +91 7792848355 for a custom quote
-5. Keep responses concise but informative (2-4 sentences typically)
-6. If the user greets you, greet them back warmly and ask how you can help
+function buildSystemPrompt(knowledge: string, detectedLang: string): string {
+  return `You are the AI assistant for AIVocal.online, an AI Voice Calling Agency. You MUST respond in ${detectedLang}.
 
-SITE KNOWLEDGE:
-${knowledge}
+CRITICAL RULES:
+1. Keep responses SHORT - 1-2 sentences maximum for voice
+2. Be conversational and natural
+3. Respond in ${detectedLang} language only
+4. If asked about pricing, direct to WhatsApp: +91 7792848355
+5. Be helpful and friendly
 
-LANGUAGE DETECTION:
-- If user speaks English, respond in English
-- If user speaks Hindi (हिंदी), respond in Hindi
-- If user speaks Spanish (Español), respond in Spanish
-- If user speaks any other language, respond in that language
-- Always be natural and fluent in the detected language`;
+KNOWLEDGE:
+${knowledge}`;
 }
 
 serve(async (req) => {
@@ -122,20 +156,26 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Fetch dynamic knowledge from database
-    const knowledge = await getKnowledgeBase();
-    const systemPrompt = buildSystemPrompt(knowledge);
+    // Detect language from user message
+    const detectedLanguage = detectLanguage(message);
+    console.log('Detected language:', detectedLanguage);
 
-    // Build messages array with conversation history
+    // Fetch dynamic knowledge from database (with caching)
+    const knowledge = await getKnowledgeBase();
+    const systemPrompt = buildSystemPrompt(knowledge, detectedLanguage);
+
+    // Build messages array - limit history for speed
+    const recentHistory = conversationHistory.slice(-4);
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...conversationHistory.map((msg: { role: string; content: string }) => ({
+      ...recentHistory.map((msg: { role: string; content: string }) => ({
         role: msg.role,
         content: msg.content
       })),
       { role: 'user', content: message }
     ];
 
+    // Use direct chat completion without tool calling for speed
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -143,32 +183,9 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-flash-lite', // Faster model for voice
         messages,
-        tools: [
-          {
-            type: 'function',
-            function: {
-              name: 'detect_language',
-              description: 'Detect the language of the response',
-              parameters: {
-                type: 'object',
-                properties: {
-                  language: { 
-                    type: 'string',
-                    description: 'The detected language name in English (e.g., English, Hindi, Spanish, French, German, Chinese, Japanese, Korean, Arabic, Portuguese, Russian, Italian)'
-                  },
-                  response: {
-                    type: 'string',
-                    description: 'The actual response to the user in their language'
-                  }
-                },
-                required: ['language', 'response']
-              }
-            }
-          }
-        ],
-        tool_choice: { type: 'function', function: { name: 'detect_language' } }
+        max_tokens: 150, // Shorter responses for voice
       }),
     });
 
@@ -187,24 +204,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    
-    let aiResponse = '';
-    let detectedLanguage = 'English';
-    
-    // Parse tool call response
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (toolCall?.function?.arguments) {
-      try {
-        const args = JSON.parse(toolCall.function.arguments);
-        aiResponse = args.response || '';
-        detectedLanguage = args.language || 'English';
-      } catch (e) {
-        console.error('Failed to parse tool call:', e);
-        aiResponse = data.choices?.[0]?.message?.content || 'I apologize, but I could not process your request.';
-      }
-    } else {
-      aiResponse = data.choices?.[0]?.message?.content || 'I apologize, but I could not process your request.';
-    }
+    const aiResponse = data.choices?.[0]?.message?.content || 'I apologize, but I could not process your request.';
 
     console.log('Response language:', detectedLanguage);
     console.log('Response:', aiResponse.substring(0, 100) + '...');
