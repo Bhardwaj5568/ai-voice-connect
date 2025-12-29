@@ -1,4 +1,5 @@
 import { PhoneOutgoing, PhoneIncoming, Bell, Settings } from "lucide-react";
+import { ScrollReveal, ScrollRevealGroup } from "@/components/ScrollReveal";
 
 const services = [
   {
@@ -31,21 +32,25 @@ export const ServicesSection = () => {
   return (
     <section id="services" className="py-24 relative">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <ScrollReveal variant="fade-up" className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-6">
             <Settings className="w-4 h-4 text-primary" />
             <span className="text-sm text-muted-foreground">Our Services</span>
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
             Core Services
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Comprehensive AI voice solutions tailored to your business needs.
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {services.map((service, index) => (
+        <ScrollRevealGroup
+          variant="fade-left"
+          staggerDelay={150}
+          className="grid md:grid-cols-2 gap-8"
+        >
+          {services.map((service) => (
             <div
               key={service.title}
               className="glass-card rounded-3xl p-8 hover:border-primary/30 hover:glow-sm transition-all duration-300 group"
@@ -55,7 +60,7 @@ export const ServicesSection = () => {
                   <service.icon className="w-8 h-8 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-foreground mb-2">{service.title}</h3>
+                  <h3 className="text-xl font-display font-bold text-foreground mb-2">{service.title}</h3>
                   <p className="text-muted-foreground mb-4">{service.description}</p>
                   <ul className="grid grid-cols-2 gap-2">
                     {service.features.map((feature) => (
@@ -69,7 +74,7 @@ export const ServicesSection = () => {
               </div>
             </div>
           ))}
-        </div>
+        </ScrollRevealGroup>
       </div>
     </section>
   );

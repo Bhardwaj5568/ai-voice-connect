@@ -1,4 +1,5 @@
 import { Building, Stethoscope, ShoppingBag, Headphones, Target, Calendar, GraduationCap, Store } from "lucide-react";
+import { ScrollReveal, ScrollRevealGroup } from "@/components/ScrollReveal";
 
 const industries = [
   {
@@ -57,21 +58,25 @@ export const IndustriesSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
+        <ScrollReveal variant="fade-up" className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-6">
             <Building className="w-4 h-4 text-primary" />
             <span className="text-sm text-muted-foreground">Industries We Serve</span>
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
             Built for High-Demand Niches
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Industries that understand the value of every phone call choose AI voice agents.
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {industries.map((industry, index) => (
+        <ScrollRevealGroup
+          variant="zoom-in"
+          staggerDelay={60}
+          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          {industries.map((industry) => (
             <div
               key={industry.title}
               className="glass-card rounded-2xl p-6 hover:border-primary/30 hover:scale-105 transition-all duration-300 group cursor-pointer"
@@ -83,7 +88,7 @@ export const IndustriesSection = () => {
               <p className="text-muted-foreground text-sm">{industry.description}</p>
             </div>
           ))}
-        </div>
+        </ScrollRevealGroup>
       </div>
     </section>
   );
