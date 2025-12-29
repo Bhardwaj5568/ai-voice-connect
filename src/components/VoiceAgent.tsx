@@ -1,10 +1,11 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Volume2, X, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { VoiceWaveform } from './VoiceWaveform';
 import { TypingIndicator } from './TypingIndicator';
+import { AIAvatar3D } from './AIAvatar3D';
 
 // TypeScript declarations for Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -235,39 +236,52 @@ export const VoiceAgent = () => {
       {/* Voice Agent Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-md bg-background/95 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-to-r from-primary/10 to-cyan-500/10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-cyan-500 flex items-center justify-center">
-                  {isSpeaking ? (
-                    <VoiceWaveform isActive={isSpeaking} color="white" barCount={3} />
-                  ) : (
-                    <Volume2 className="w-5 h-5 text-white" />
-                  )}
+          <div className="relative w-full max-w-lg bg-background/95 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl overflow-hidden">
+            {/* 3D Avatar Section */}
+            <div className="h-48 bg-gradient-to-b from-primary/5 to-transparent relative">
+              <Suspense fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-primary/20 animate-pulse" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">AIVocal Assistant</h3>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Globe className="w-3 h-3" />
-                    <span>Speaking: {detectedLanguage}</span>
-                  </div>
-                </div>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              }>
+                <AIAvatar3D 
+                  state={
+                    isListening ? 'listening' : 
+                    isSpeaking ? 'speaking' : 
+                    isProcessing ? 'processing' : 
+                    'idle'
+                  } 
+                />
+              </Suspense>
+              
+              {/* Close button overlay */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsOpen(false)}
+                className="absolute top-2 right-2 bg-background/50 backdrop-blur-sm hover:bg-background/80"
+              >
                 <X className="w-5 h-5" />
               </Button>
             </div>
 
+            {/* Header */}
+            <div className="flex items-center justify-center p-3 border-b border-border/50 bg-gradient-to-r from-primary/10 to-cyan-500/10">
+              <div className="text-center">
+                <h3 className="font-semibold text-foreground">AIVocal Assistant</h3>
+                <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+                  <Globe className="w-3 h-3" />
+                  <span>Speaking: {detectedLanguage}</span>
+                </div>
+              </div>
+            </div>
+
             {/* Messages */}
-            <div className="h-80 overflow-y-auto p-4 space-y-4">
+            <div className="h-48 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 && (
-                <div className="text-center text-muted-foreground py-8">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Mic className="w-8 h-8 text-primary" />
-                  </div>
+                <div className="text-center text-muted-foreground py-4">
                   <p className="text-sm">Press the microphone and speak in any language.</p>
-                  <p className="text-xs mt-2">Supports English, Hindi, Spanish & more</p>
+                  <p className="text-xs mt-1">Supports English, Hindi, Spanish & more</p>
                 </div>
               )}
               
