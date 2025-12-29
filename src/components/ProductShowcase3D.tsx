@@ -271,6 +271,7 @@ const products = [
 export const ProductShowcase3D = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoom, setZoom] = useState(5);
+  const [isInteracting, setIsInteracting] = useState(false);
   const controlsRef = useRef<any>(null);
   
   const activeProduct = products[activeIndex];
@@ -297,6 +298,14 @@ export const ProductShowcase3D = () => {
 
   const handleZoomOut = () => {
     setZoom((prev) => Math.min(8, prev + 1));
+  };
+
+  const handleInteractionStart = () => {
+    setIsInteracting(true);
+  };
+
+  const handleInteractionEnd = () => {
+    setIsInteracting(false);
   };
 
   return (
@@ -346,7 +355,13 @@ export const ProductShowcase3D = () => {
                   enablePan={false}
                   minDistance={3}
                   maxDistance={8}
-                  autoRotate={false}
+                  autoRotate={!isInteracting}
+                  autoRotateSpeed={1.5}
+                  enableDamping={true}
+                  dampingFactor={0.05}
+                  touches={{ ONE: 1, TWO: 2 }}
+                  onStart={handleInteractionStart}
+                  onEnd={handleInteractionEnd}
                 />
               </Suspense>
             </Canvas>
