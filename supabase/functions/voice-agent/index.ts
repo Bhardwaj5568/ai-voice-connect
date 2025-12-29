@@ -1,12 +1,57 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// AIVocal.online site knowledge base
-const SITE_KNOWLEDGE = `
+// Fetch dynamic knowledge from database
+async function getKnowledgeBase(): Promise<string> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Supabase credentials not configured');
+    return getFallbackKnowledge();
+  }
+
+  try {
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    const { data, error } = await supabase
+      .from('ai_knowledge')
+      .select('section_title, content')
+      .eq('is_active', true)
+      .order('priority', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching knowledge:', error);
+      return getFallbackKnowledge();
+    }
+
+    if (!data || data.length === 0) {
+      console.log('No knowledge found in database, using fallback');
+      return getFallbackKnowledge();
+    }
+
+    // Build knowledge string from database records
+    let knowledge = '# AIVocal.online - AI Voice Calling Agency\n\n';
+    for (const item of data) {
+      knowledge += `## ${item.section_title}\n${item.content}\n\n`;
+    }
+    
+    console.log(`Loaded ${data.length} knowledge sections from database`);
+    return knowledge;
+  } catch (e) {
+    console.error('Exception fetching knowledge:', e);
+    return getFallbackKnowledge();
+  }
+}
+
+// Fallback knowledge in case database is unavailable
+function getFallbackKnowledge(): string {
+  return `
 # AIVocal.online - AI Voice Calling Agency
 
 ## About Us
@@ -16,66 +61,27 @@ AIVocal.online is an AI Voice Calling Agency based in Jaipur, Rajasthan, India. 
 - Name: Neeraj Sharma
 - Title: Founder & CEO
 - Location: Jaipur, Rajasthan, India
-- Background: Passionate entrepreneur dedicated to transforming business communication through AI voice technology. Committed to delivering enterprise-grade AI solutions that are accessible to businesses of all sizes.
 
 ## Contact
 - WhatsApp: +91 7792848355
 - Website: aivocal.online
 
 ## Core Services
-
-### 1. Inbound Call Handling
-- AI agents answer customer calls 24/7
-- Handle inquiries, complaints, and support requests
-- Route complex issues to human agents when needed
-
-### 2. Outbound Calling
-- Automated lead qualification calls
-- Appointment reminders and confirmations
-- Follow-up calls and customer surveys
-
-### 3. Appointment Scheduling
-- AI books appointments directly into your calendar
-- Sends confirmation and reminder messages
-- Handles rescheduling and cancellations
-
-### 4. Lead Qualification
-- Scores and qualifies leads automatically
-- Asks qualifying questions based on your criteria
-- Prioritizes hot leads for immediate follow-up
-
-## Target Industries
-1. Healthcare & Medical Clinics - Patient appointment scheduling, reminders, and follow-ups
-2. Real Estate Agencies - Property inquiries, viewings, and lead qualification
-3. E-commerce & Retail - Order status, returns, and customer support
-4. Financial Services - Account inquiries, loan applications, and support
-5. Hospitality & Hotels - Reservations, concierge services, and guest support
-6. Education & EdTech - Enrollment inquiries, course information, and student support
-7. Legal Services - Client intake, appointment scheduling, and case updates
-8. Automotive & Car Dealerships - Test drive bookings, service appointments, and inquiries
+1. Inbound Call Handling - AI agents answer customer calls 24/7
+2. Outbound Calling - Automated lead qualification and follow-up calls
+3. Appointment Scheduling - AI books appointments directly into your calendar
+4. Lead Qualification - Scores and qualifies leads automatically
 
 ## Key Benefits
-- 24/7 Availability: Never miss a call, even outside business hours
-- 50% Cost Reduction: Reduce operational costs compared to traditional call centers
-- 3x More Conversions: Higher engagement and follow-up rates
-- Human-like Conversations: Natural, context-aware AI that feels authentic
-- Easy Integration: Works with your existing CRM, calendar, and phone systems
-- Global Reach: Support customers in multiple languages and time zones
-
-## Why Choose an Agency Over Building Custom?
-- Focus on Results, Not Tools: We handle the technology while you focus on your business
-- Quick Deployment: Get started in days, not months
-- Proven Systems: Benefit from tested and optimized AI voice solutions
-- Ongoing Support: Continuous improvement and technical support included
-
-## Common Problems We Solve
-1. Missed Calls = Lost Revenue: Never miss a potential customer again
-2. High Staffing Costs: Reduce the need for large call center teams
-3. Inconsistent Service: Provide consistent, high-quality responses every time
-4. Limited Hours: Be available to customers 24/7/365
+- 24/7 Availability: Never miss a call
+- 50% Cost Reduction: Reduce operational costs
+- 3x More Conversions: Higher engagement rates
+- Human-like Conversations: Natural, context-aware AI
 `;
+}
 
-const SYSTEM_PROMPT = `You are the AI assistant for AIVocal.online, an AI Voice Calling Agency. You are multilingual and can respond in any language the user speaks.
+function buildSystemPrompt(knowledge: string): string {
+  return `You are the AI assistant for AIVocal.online, an AI Voice Calling Agency. You are multilingual and can respond in any language the user speaks.
 
 IMPORTANT INSTRUCTIONS:
 1. DETECT the language of the user's message and RESPOND IN THE SAME LANGUAGE
@@ -86,7 +92,7 @@ IMPORTANT INSTRUCTIONS:
 6. If the user greets you, greet them back warmly and ask how you can help
 
 SITE KNOWLEDGE:
-${SITE_KNOWLEDGE}
+${knowledge}
 
 LANGUAGE DETECTION:
 - If user speaks English, respond in English
@@ -94,6 +100,7 @@ LANGUAGE DETECTION:
 - If user speaks Spanish (Español), respond in Spanish
 - If user speaks any other language, respond in that language
 - Always be natural and fluent in the detected language`;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -115,9 +122,13 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
+    // Fetch dynamic knowledge from database
+    const knowledge = await getKnowledgeBase();
+    const systemPrompt = buildSystemPrompt(knowledge);
+
     // Build messages array with conversation history
     const messages = [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: systemPrompt },
       ...conversationHistory.map((msg: { role: string; content: string }) => ({
         role: msg.role,
         content: msg.content
