@@ -25,7 +25,7 @@ import { ScrollProgress } from "@/components/ScrollProgress";
 import { CaseStudiesSection } from "@/components/CaseStudiesSection";
 import { PressSection } from "@/components/PressSection";
 import { LiveActivityFeed } from "@/components/LiveActivityFeed";
-import { LoadingSplash } from "@/components/LoadingSplash";
+
 import { ParallaxBackground } from "@/components/ParallaxBackground";
 import { ComparisonSlider } from "@/components/ComparisonSlider";
 
@@ -34,7 +34,7 @@ const Scene3D = lazy(() => import("@/components/Scene3D").then(m => ({ default: 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background scroll-snap-container">
-      <LoadingSplash />
+      
       <ScrollProgress />
       <ParallaxBackground />
       
