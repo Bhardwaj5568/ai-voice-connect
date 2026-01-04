@@ -172,44 +172,61 @@ function detectLanguage(text: string): string {
 }
 
 function buildSystemPrompt(knowledge: string, detectedLang: string): string {
-  const langInstructions: Record<string, string> = {
-    // Indian Languages
-    hindi: "IMPORTANT: Respond ONLY in Hindi (Devanagari script - हिंदी में जवाब दें).",
-    hinglish: "IMPORTANT: Respond in Hinglish (Hindi words in Roman script mixed with English).",
-    bengali: "IMPORTANT: Respond ONLY in Bengali (বাংলায় উত্তর দিন).",
-    tamil: "IMPORTANT: Respond ONLY in Tamil (தமிழில் பதிலளிக்கவும்).",
-    telugu: "IMPORTANT: Respond ONLY in Telugu (తెలుగులో సమాధానం ఇవ్వండి).",
-    gujarati: "IMPORTANT: Respond ONLY in Gujarati (ગુજરાતીમાં જવાબ આપો).",
-    kannada: "IMPORTANT: Respond ONLY in Kannada (ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ).",
-    malayalam: "IMPORTANT: Respond ONLY in Malayalam (മലയാളത്തിൽ മറുപടി നൽകുക).",
-    punjabi: "IMPORTANT: Respond ONLY in Punjabi (ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ).",
-    odia: "IMPORTANT: Respond ONLY in Odia (ଓଡ଼ିଆରେ ଉତ୍ତର ଦିଅନ୍ତୁ).",
-    // International Languages
-    arabic: "IMPORTANT: Respond ONLY in Arabic (الرجاء الرد بالعربية).",
-    chinese: "IMPORTANT: Respond ONLY in Chinese (请用中文回复).",
-    japanese: "IMPORTANT: Respond ONLY in Japanese (日本語でお答えください).",
-    korean: "IMPORTANT: Respond ONLY in Korean (한국어로 답변해 주세요).",
-    russian: "IMPORTANT: Respond ONLY in Russian (Пожалуйста, отвечайте на русском).",
-    thai: "IMPORTANT: Respond ONLY in Thai (กรุณาตอบเป็นภาษาไทย).",
-    hebrew: "IMPORTANT: Respond ONLY in Hebrew (אנא השב בעברית).",
-    greek: "IMPORTANT: Respond ONLY in Greek (Παρακαλώ απαντήστε στα ελληνικά).",
-    spanish: "IMPORTANT: Respond ONLY in Spanish (Por favor, responde en español).",
-    french: "IMPORTANT: Respond ONLY in French (Veuillez répondre en français).",
-    german: "IMPORTANT: Respond ONLY in German (Bitte antworten Sie auf Deutsch).",
-    portuguese: "IMPORTANT: Respond ONLY in Portuguese (Por favor, responda em português).",
-    italian: "IMPORTANT: Respond ONLY in Italian (Per favore, rispondi in italiano).",
-    dutch: "IMPORTANT: Respond ONLY in Dutch (Antwoord alstublieft in het Nederlands).",
-    turkish: "IMPORTANT: Respond ONLY in Turkish (Lütfen Türkçe cevap verin).",
-    indonesian: "IMPORTANT: Respond ONLY in Indonesian (Tolong jawab dalam bahasa Indonesia).",
-    vietnamese: "IMPORTANT: Respond ONLY in Vietnamese (Vui lòng trả lời bằng tiếng Việt).",
-    english: "Respond in English.",
+  // Language instructions with currency info
+  const langConfig: Record<string, { instruction: string; currency: string; symbol: string; rate: number }> = {
+    // Indian Languages - INR
+    hindi: { instruction: "Respond ONLY in Hindi (Devanagari script - हिंदी में जवाब दें).", currency: "INR", symbol: "₹", rate: 1 },
+    hinglish: { instruction: "Respond in Hinglish (Hindi words in Roman script mixed with English).", currency: "INR", symbol: "₹", rate: 1 },
+    bengali: { instruction: "Respond ONLY in Bengali (বাংলায় উত্তর দিন).", currency: "INR", symbol: "₹", rate: 1 },
+    tamil: { instruction: "Respond ONLY in Tamil (தமிழில் பதிலளிக்கவும்).", currency: "INR", symbol: "₹", rate: 1 },
+    telugu: { instruction: "Respond ONLY in Telugu (తెలుగులో సమాధానం ఇవ్వండి).", currency: "INR", symbol: "₹", rate: 1 },
+    gujarati: { instruction: "Respond ONLY in Gujarati (ગુજરાતીમાં જવાબ આપો).", currency: "INR", symbol: "₹", rate: 1 },
+    kannada: { instruction: "Respond ONLY in Kannada (ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ).", currency: "INR", symbol: "₹", rate: 1 },
+    malayalam: { instruction: "Respond ONLY in Malayalam (മലയാളത്തിൽ മറുപടി നൽകുക).", currency: "INR", symbol: "₹", rate: 1 },
+    punjabi: { instruction: "Respond ONLY in Punjabi (ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ).", currency: "INR", symbol: "₹", rate: 1 },
+    odia: { instruction: "Respond ONLY in Odia (ଓଡ଼ିଆରେ ଉତ୍ତର ଦିଅନ୍ତୁ).", currency: "INR", symbol: "₹", rate: 1 },
+    // European Languages - EUR
+    spanish: { instruction: "Respond ONLY in Spanish (Por favor, responde en español).", currency: "EUR", symbol: "€", rate: 0.011 },
+    french: { instruction: "Respond ONLY in French (Veuillez répondre en français).", currency: "EUR", symbol: "€", rate: 0.011 },
+    german: { instruction: "Respond ONLY in German (Bitte antworten Sie auf Deutsch).", currency: "EUR", symbol: "€", rate: 0.011 },
+    italian: { instruction: "Respond ONLY in Italian (Per favore, rispondi in italiano).", currency: "EUR", symbol: "€", rate: 0.011 },
+    dutch: { instruction: "Respond ONLY in Dutch (Antwoord alstublieft in het Nederlands).", currency: "EUR", symbol: "€", rate: 0.011 },
+    greek: { instruction: "Respond ONLY in Greek (Παρακαλώ απαντήστε στα ελληνικά).", currency: "EUR", symbol: "€", rate: 0.011 },
+    portuguese: { instruction: "Respond ONLY in Portuguese (Por favor, responda em português).", currency: "EUR", symbol: "€", rate: 0.011 },
+    // Other International
+    english: { instruction: "Respond in English.", currency: "USD", symbol: "$", rate: 0.012 },
+    arabic: { instruction: "Respond ONLY in Arabic (الرجاء الرد بالعربية).", currency: "AED", symbol: "د.إ", rate: 0.044 },
+    chinese: { instruction: "Respond ONLY in Chinese (请用中文回复).", currency: "CNY", symbol: "¥", rate: 0.086 },
+    japanese: { instruction: "Respond ONLY in Japanese (日本語でお答えください).", currency: "JPY", symbol: "¥", rate: 1.8 },
+    korean: { instruction: "Respond ONLY in Korean (한국어로 답변해 주세요).", currency: "KRW", symbol: "₩", rate: 16.5 },
+    russian: { instruction: "Respond ONLY in Russian (Пожалуйста, отвечайте на русском).", currency: "RUB", symbol: "₽", rate: 1.1 },
+    thai: { instruction: "Respond ONLY in Thai (กรุณาตอบเป็นภาษาไทย).", currency: "THB", symbol: "฿", rate: 0.41 },
+    hebrew: { instruction: "Respond ONLY in Hebrew (אנא השב בעברית).", currency: "ILS", symbol: "₪", rate: 0.043 },
+    turkish: { instruction: "Respond ONLY in Turkish (Lütfen Türkçe cevap verin).", currency: "TRY", symbol: "₺", rate: 0.38 },
+    indonesian: { instruction: "Respond ONLY in Indonesian (Tolong jawab dalam bahasa Indonesia).", currency: "IDR", symbol: "Rp", rate: 188 },
+    vietnamese: { instruction: "Respond ONLY in Vietnamese (Vui lòng trả lời bằng tiếng Việt).", currency: "VND", symbol: "₫", rate: 300 },
   };
 
-  const langInstruction = langInstructions[detectedLang] || langInstructions.english;
+  const config = langConfig[detectedLang] || langConfig.english;
+  
+  // Calculate prices in local currency (base prices in INR)
+  const starterPrice = Math.round(15000 * config.rate);
+  const proPrice = Math.round(35000 * config.rate);
+  
+  const pricingInfo = `
+PRICING (show in ${config.currency}):
+- Starter Plan: ${config.symbol}${starterPrice.toLocaleString()}/month (1,000 AI calls)
+- Professional Plan: ${config.symbol}${proPrice.toLocaleString()}/month (5,000 AI calls)
+- Enterprise Plan: Custom pricing (unlimited calls)
+`;
+
+  const langInstruction = config.instruction;
 
   return `You are AIVocal's helpful AI assistant. You help visitors learn about our AI voice calling services.
 
-${langInstruction}
+IMPORTANT: ${langInstruction}
+
+${pricingInfo}
 
 KNOWLEDGE BASE:
 ${knowledge}
@@ -217,7 +234,7 @@ ${knowledge}
 RULES:
 1. Be friendly, helpful and concise
 2. Keep responses under 150 words
-3. If asked about pricing, share the plans
+3. If asked about pricing, ALWAYS use the currency and prices from PRICING section above - NEVER use INR for non-Indian languages
 4. For demo requests, ask them to contact via WhatsApp: +91 7792848355
 5. Stay focused on AIVocal's services
 6. If you don't know something, honestly say so and suggest contacting support
