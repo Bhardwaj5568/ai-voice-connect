@@ -172,9 +172,9 @@ function detectLanguage(text: string): string {
 }
 
 function buildSystemPrompt(knowledge: string, detectedLang: string): string {
-  // Language instructions with currency info
+  // Language instructions with currency info (rates are approximate INR conversions)
   const langConfig: Record<string, { instruction: string; currency: string; symbol: string; rate: number }> = {
-    // Indian Languages - INR
+    // Indian Languages - INR (₹)
     hindi: { instruction: "Respond ONLY in Hindi (Devanagari script - हिंदी में जवाब दें).", currency: "INR", symbol: "₹", rate: 1 },
     hinglish: { instruction: "Respond in Hinglish (Hindi words in Roman script mixed with English).", currency: "INR", symbol: "₹", rate: 1 },
     bengali: { instruction: "Respond ONLY in Bengali (বাংলায় উত্তর দিন).", currency: "INR", symbol: "₹", rate: 1 },
@@ -185,7 +185,8 @@ function buildSystemPrompt(knowledge: string, detectedLang: string): string {
     malayalam: { instruction: "Respond ONLY in Malayalam (മലയാളത്തിൽ മറുപടി നൽകുക).", currency: "INR", symbol: "₹", rate: 1 },
     punjabi: { instruction: "Respond ONLY in Punjabi (ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ).", currency: "INR", symbol: "₹", rate: 1 },
     odia: { instruction: "Respond ONLY in Odia (ଓଡ଼ିଆରେ ଉତ୍ତର ଦିଅନ୍ତୁ).", currency: "INR", symbol: "₹", rate: 1 },
-    // European Languages - EUR
+    
+    // European Languages - EUR (€)
     spanish: { instruction: "Respond ONLY in Spanish (Por favor, responde en español).", currency: "EUR", symbol: "€", rate: 0.011 },
     french: { instruction: "Respond ONLY in French (Veuillez répondre en français).", currency: "EUR", symbol: "€", rate: 0.011 },
     german: { instruction: "Respond ONLY in German (Bitte antworten Sie auf Deutsch).", currency: "EUR", symbol: "€", rate: 0.011 },
@@ -193,31 +194,58 @@ function buildSystemPrompt(knowledge: string, detectedLang: string): string {
     dutch: { instruction: "Respond ONLY in Dutch (Antwoord alstublieft in het Nederlands).", currency: "EUR", symbol: "€", rate: 0.011 },
     greek: { instruction: "Respond ONLY in Greek (Παρακαλώ απαντήστε στα ελληνικά).", currency: "EUR", symbol: "€", rate: 0.011 },
     portuguese: { instruction: "Respond ONLY in Portuguese (Por favor, responda em português).", currency: "EUR", symbol: "€", rate: 0.011 },
-    // Other International
+    
+    // USA - USD ($)
     english: { instruction: "Respond in English.", currency: "USD", symbol: "$", rate: 0.012 },
-    arabic: { instruction: "Respond ONLY in Arabic (الرجاء الرد بالعربية).", currency: "AED", symbol: "د.إ", rate: 0.044 },
+    
+    // Middle East & Gulf Countries - USD (widely accepted, or AED/SAR equivalent)
+    arabic: { instruction: "Respond ONLY in Arabic (الرجاء الرد بالعربية). For Gulf countries like UAE, Saudi, Kuwait, Bahrain, Jordan, Qatar, Oman.", currency: "USD", symbol: "$", rate: 0.012 },
+    
+    // Asia Pacific
     chinese: { instruction: "Respond ONLY in Chinese (请用中文回复).", currency: "CNY", symbol: "¥", rate: 0.086 },
-    japanese: { instruction: "Respond ONLY in Japanese (日本語でお答えください).", currency: "JPY", symbol: "¥", rate: 1.8 },
-    korean: { instruction: "Respond ONLY in Korean (한국어로 답변해 주세요).", currency: "KRW", symbol: "₩", rate: 16.5 },
-    russian: { instruction: "Respond ONLY in Russian (Пожалуйста, отвечайте на русском).", currency: "RUB", symbol: "₽", rate: 1.1 },
+    japanese: { instruction: "Respond ONLY in Japanese (日本語でお答えください).", currency: "JPY", symbol: "¥", rate: 1.78 },
+    korean: { instruction: "Respond ONLY in Korean (한국어로 답변해 주세요).", currency: "KRW", symbol: "₩", rate: 16.2 },
     thai: { instruction: "Respond ONLY in Thai (กรุณาตอบเป็นภาษาไทย).", currency: "THB", symbol: "฿", rate: 0.41 },
+    indonesian: { instruction: "Respond ONLY in Indonesian (Tolong jawab dalam bahasa Indonesia).", currency: "IDR", symbol: "Rp", rate: 188 },
+    vietnamese: { instruction: "Respond ONLY in Vietnamese (Vui lòng trả lời bằng tiếng Việt).", currency: "VND", symbol: "₫", rate: 295 },
+    malay: { instruction: "Respond ONLY in Malay (Sila jawab dalam Bahasa Melayu).", currency: "MYR", symbol: "RM", rate: 0.053 },
+    
+    // Other Regions
+    russian: { instruction: "Respond ONLY in Russian (Пожалуйста, отвечайте на русском).", currency: "RUB", symbol: "₽", rate: 1.08 },
     hebrew: { instruction: "Respond ONLY in Hebrew (אנא השב בעברית).", currency: "ILS", symbol: "₪", rate: 0.043 },
     turkish: { instruction: "Respond ONLY in Turkish (Lütfen Türkçe cevap verin).", currency: "TRY", symbol: "₺", rate: 0.38 },
-    indonesian: { instruction: "Respond ONLY in Indonesian (Tolong jawab dalam bahasa Indonesia).", currency: "IDR", symbol: "Rp", rate: 188 },
-    vietnamese: { instruction: "Respond ONLY in Vietnamese (Vui lòng trả lời bằng tiếng Việt).", currency: "VND", symbol: "₫", rate: 300 },
+    polish: { instruction: "Respond ONLY in Polish (Proszę odpowiedzieć po polsku).", currency: "PLN", symbol: "zł", rate: 0.047 },
+    ukrainian: { instruction: "Respond ONLY in Ukrainian (Будь ласка, відповідайте українською).", currency: "UAH", symbol: "₴", rate: 0.49 },
+    swedish: { instruction: "Respond ONLY in Swedish (Vänligen svara på svenska).", currency: "SEK", symbol: "kr", rate: 0.124 },
+    danish: { instruction: "Respond ONLY in Danish (Svar venligst på dansk).", currency: "DKK", symbol: "kr", rate: 0.082 },
+    norwegian: { instruction: "Respond ONLY in Norwegian (Vennligst svar på norsk).", currency: "NOK", symbol: "kr", rate: 0.127 },
+    czech: { instruction: "Respond ONLY in Czech (Prosím odpovězte česky).", currency: "CZK", symbol: "Kč", rate: 0.274 },
+    hungarian: { instruction: "Respond ONLY in Hungarian (Kérem, válaszoljon magyarul).", currency: "HUF", symbol: "Ft", rate: 4.3 },
+    romanian: { instruction: "Respond ONLY in Romanian (Vă rugăm să răspundeți în română).", currency: "RON", symbol: "lei", rate: 0.055 },
+    filipino: { instruction: "Respond ONLY in Filipino (Mangyaring sumagot sa Filipino).", currency: "PHP", symbol: "₱", rate: 0.67 },
+    swahili: { instruction: "Respond ONLY in Swahili (Tafadhali jibu kwa Kiswahili).", currency: "KES", symbol: "KSh", rate: 1.54 },
   };
 
   const config = langConfig[detectedLang] || langConfig.english;
   
-  // Calculate prices in local currency (base prices in INR)
+  // Calculate prices in local currency (base prices in INR: 15000 and 35000)
   const starterPrice = Math.round(15000 * config.rate);
   const proPrice = Math.round(35000 * config.rate);
   
+  // Format price with proper separators
+  const formatPrice = (price: number) => {
+    if (price >= 1000) {
+      return price.toLocaleString('en-US');
+    }
+    return price.toString();
+  };
+  
   const pricingInfo = `
-PRICING (show in ${config.currency}):
-- Starter Plan: ${config.symbol}${starterPrice.toLocaleString()}/month (1,000 AI calls)
-- Professional Plan: ${config.symbol}${proPrice.toLocaleString()}/month (5,000 AI calls)
+PRICING (MUST use ${config.currency} currency with ${config.symbol} symbol):
+- Starter Plan: ${config.symbol}${formatPrice(starterPrice)}/month (1,000 AI calls)
+- Professional Plan: ${config.symbol}${formatPrice(proPrice)}/month (5,000 AI calls)
 - Enterprise Plan: Custom pricing (unlimited calls)
+IMPORTANT: Always show prices in ${config.currency} (${config.symbol}), NEVER use INR or ₹ for non-Indian languages.
 `;
 
   const langInstruction = config.instruction;

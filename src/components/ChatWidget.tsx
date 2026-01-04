@@ -109,14 +109,21 @@ export const ChatWidget = () => {
       malayalam: "മലയാളം",
       punjabi: "ਪੰਜਾਬੀ",
       odia: "ଓଡ଼ିଆ",
-      // International
+      // Middle East
       arabic: "العربية",
+      hebrew: "עברית",
+      // East Asia
       chinese: "中文",
       japanese: "日本語",
       korean: "한국어",
-      russian: "Русский",
+      // Southeast Asia
       thai: "ไทย",
-      hebrew: "עברית",
+      indonesian: "Bahasa",
+      vietnamese: "Tiếng Việt",
+      malay: "Melayu",
+      filipino: "Filipino",
+      // Europe
+      russian: "Русский",
       greek: "Ελληνικά",
       spanish: "Español",
       french: "Français",
@@ -125,8 +132,17 @@ export const ChatWidget = () => {
       italian: "Italiano",
       dutch: "Nederlands",
       turkish: "Türkçe",
-      indonesian: "Bahasa",
-      vietnamese: "Tiếng Việt",
+      polish: "Polski",
+      ukrainian: "Українська",
+      swedish: "Svenska",
+      danish: "Dansk",
+      norwegian: "Norsk",
+      czech: "Čeština",
+      hungarian: "Magyar",
+      romanian: "Română",
+      // Africa
+      swahili: "Kiswahili",
+      // Default
       english: "English"
     };
     return labels[detectedLanguage] || "English";
