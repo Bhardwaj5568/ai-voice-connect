@@ -73,33 +73,56 @@ Website: aivocal.in
 }
 
 function detectLanguage(text: string): string {
-  // Hindi (Devanagari script)
+  // === INDIAN LANGUAGES ===
   const hindiPattern = /[\u0900-\u097F]/;
-  // Bengali script
   const bengaliPattern = /[\u0980-\u09FF]/;
-  // Tamil script
   const tamilPattern = /[\u0B80-\u0BFF]/;
-  // Telugu script
   const teluguPattern = /[\u0C00-\u0C7F]/;
-  // Gujarati script
   const gujaratiPattern = /[\u0A80-\u0AFF]/;
-  // Kannada script
   const kannadaPattern = /[\u0C80-\u0CFF]/;
-  // Malayalam script
   const malayalamPattern = /[\u0D00-\u0D7F]/;
-  // Punjabi (Gurmukhi) script
   const punjabiPattern = /[\u0A00-\u0A7F]/;
-  // Odia script
   const odiaPattern = /[\u0B00-\u0B7F]/;
   
-  // Hinglish patterns (Hindi words in Roman script)
+  // === INTERNATIONAL LANGUAGES ===
+  const arabicPattern = /[\u0600-\u06FF]/;
+  const chinesePattern = /[\u4E00-\u9FFF]/;
+  const japanesePattern = /[\u3040-\u309F\u30A0-\u30FF]/;
+  const koreanPattern = /[\uAC00-\uD7AF\u1100-\u11FF]/;
+  const cyrillicPattern = /[\u0400-\u04FF]/; // Russian, Ukrainian, etc
+  const thaiPattern = /[\u0E00-\u0E7F]/;
+  const hebrewPattern = /[\u0590-\u05FF]/;
+  const greekPattern = /[\u0370-\u03FF]/;
+  
+  // Word-based detection for Latin script languages
+  const spanishPatterns = /\b(hola|gracias|por favor|buenos|buenas|cómo|está|qué|muy|también|pero|porque|tengo|quiero|necesito|dónde|cuándo|puedo|sí|español)\b/i;
+  const frenchPatterns = /\b(bonjour|merci|s'il vous plaît|comment|êtes|très|aussi|mais|parce que|j'ai|je veux|où|quand|puis-je|oui|français|bonsoir|au revoir)\b/i;
+  const germanPatterns = /\b(hallo|danke|bitte|guten|wie|sehr|auch|aber|weil|ich habe|ich möchte|wo|wann|kann ich|ja|nein|deutsch|morgen|abend)\b/i;
+  const portuguesePatterns = /\b(olá|obrigado|por favor|como|está|muito|também|mas|porque|tenho|quero|preciso|onde|quando|posso|sim|não|português)\b/i;
+  const italianPatterns = /\b(ciao|grazie|per favore|come|stai|molto|anche|ma|perché|ho|voglio|dove|quando|posso|sì|no|italiano|buongiorno)\b/i;
+  const dutchPatterns = /\b(hallo|dank|alstublieft|hoe|gaat|zeer|ook|maar|omdat|ik heb|ik wil|waar|wanneer|kan ik|ja|nee|nederlands)\b/i;
+  const turkishPatterns = /\b(merhaba|teşekkür|lütfen|nasıl|çok|da|ama|çünkü|istiyorum|nerede|ne zaman|yapabilir miyim|evet|hayır|türkçe)\b/i;
+  const indonesianPatterns = /\b(halo|terima kasih|tolong|bagaimana|sangat|juga|tetapi|karena|saya|ingin|di mana|kapan|bisa|ya|tidak|indonesia)\b/i;
+  const vietnamesePatterns = /\b(xin chào|cảm ơn|làm ơn|như thế nào|rất|cũng|nhưng|vì|tôi|muốn|ở đâu|khi nào|có thể|vâng|không|tiếng việt)\b/i;
+  
+  // Hinglish patterns
   const hinglishPatterns = [
     /\b(hai|hain|ho|tha|thi|the|ka|ki|ke|ko|se|me|ye|wo|kya|kaise|kab|kahan|kyun|aur|par|bhi|nahi|mat|abhi|bahut|accha|theek|sab|kuch|aap|tum|hum|main|mera|tera|uska|iska|wala|wali|wale)\b/i,
     /\b(karo|karna|karenge|karunga|karungi|bolo|bolna|batao|batana|dekho|dekhna|suno|sunna|jao|jana|aao|aana|khao|khana|piyo|pina|chahiye|chahte|milega|dedo|lelo)\b/i,
     /\b(namaste|dhanyavad|shukriya|kripya|jaroor|zaroor|bilkul|lekin|isliye|kyunki|phir|warna|matlab|samajh|pata)\b/i,
   ];
   
-  // Check for script-based languages first
+  // Check script-based languages (most reliable)
+  if (arabicPattern.test(text)) return "arabic";
+  if (chinesePattern.test(text)) return "chinese";
+  if (japanesePattern.test(text)) return "japanese";
+  if (koreanPattern.test(text)) return "korean";
+  if (cyrillicPattern.test(text)) return "russian";
+  if (thaiPattern.test(text)) return "thai";
+  if (hebrewPattern.test(text)) return "hebrew";
+  if (greekPattern.test(text)) return "greek";
+  
+  // Indian scripts
   if (bengaliPattern.test(text)) return "bengali";
   if (tamilPattern.test(text)) return "tamil";
   if (teluguPattern.test(text)) return "telugu";
@@ -110,7 +133,18 @@ function detectLanguage(text: string): string {
   if (odiaPattern.test(text)) return "odia";
   if (hindiPattern.test(text)) return "hindi";
   
-  // Check for Hinglish (Roman script Hindi)
+  // Latin script languages (word-based detection)
+  if (spanishPatterns.test(text)) return "spanish";
+  if (frenchPatterns.test(text)) return "french";
+  if (germanPatterns.test(text)) return "german";
+  if (portuguesePatterns.test(text)) return "portuguese";
+  if (italianPatterns.test(text)) return "italian";
+  if (dutchPatterns.test(text)) return "dutch";
+  if (turkishPatterns.test(text)) return "turkish";
+  if (indonesianPatterns.test(text)) return "indonesian";
+  if (vietnamesePatterns.test(text)) return "vietnamese";
+  
+  // Check for Hinglish
   for (const pattern of hinglishPatterns) {
     if (pattern.test(text)) return "hinglish";
   }
@@ -120,8 +154,9 @@ function detectLanguage(text: string): string {
 
 function buildSystemPrompt(knowledge: string, detectedLang: string): string {
   const langInstructions: Record<string, string> = {
+    // Indian Languages
     hindi: "IMPORTANT: Respond ONLY in Hindi (Devanagari script - हिंदी में जवाब दें).",
-    hinglish: "IMPORTANT: Respond in Hinglish (Hindi words in Roman script mixed with English, like 'Aapka swagat hai!').",
+    hinglish: "IMPORTANT: Respond in Hinglish (Hindi words in Roman script mixed with English).",
     bengali: "IMPORTANT: Respond ONLY in Bengali (বাংলায় উত্তর দিন).",
     tamil: "IMPORTANT: Respond ONLY in Tamil (தமிழில் பதிலளிக்கவும்).",
     telugu: "IMPORTANT: Respond ONLY in Telugu (తెలుగులో సమాధానం ఇవ్వండి).",
@@ -130,6 +165,24 @@ function buildSystemPrompt(knowledge: string, detectedLang: string): string {
     malayalam: "IMPORTANT: Respond ONLY in Malayalam (മലയാളത്തിൽ മറുപടി നൽകുക).",
     punjabi: "IMPORTANT: Respond ONLY in Punjabi (ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ).",
     odia: "IMPORTANT: Respond ONLY in Odia (ଓଡ଼ିଆରେ ଉତ୍ତର ଦିଅନ୍ତୁ).",
+    // International Languages
+    arabic: "IMPORTANT: Respond ONLY in Arabic (الرجاء الرد بالعربية).",
+    chinese: "IMPORTANT: Respond ONLY in Chinese (请用中文回复).",
+    japanese: "IMPORTANT: Respond ONLY in Japanese (日本語でお答えください).",
+    korean: "IMPORTANT: Respond ONLY in Korean (한국어로 답변해 주세요).",
+    russian: "IMPORTANT: Respond ONLY in Russian (Пожалуйста, отвечайте на русском).",
+    thai: "IMPORTANT: Respond ONLY in Thai (กรุณาตอบเป็นภาษาไทย).",
+    hebrew: "IMPORTANT: Respond ONLY in Hebrew (אנא השב בעברית).",
+    greek: "IMPORTANT: Respond ONLY in Greek (Παρακαλώ απαντήστε στα ελληνικά).",
+    spanish: "IMPORTANT: Respond ONLY in Spanish (Por favor, responde en español).",
+    french: "IMPORTANT: Respond ONLY in French (Veuillez répondre en français).",
+    german: "IMPORTANT: Respond ONLY in German (Bitte antworten Sie auf Deutsch).",
+    portuguese: "IMPORTANT: Respond ONLY in Portuguese (Por favor, responda em português).",
+    italian: "IMPORTANT: Respond ONLY in Italian (Per favore, rispondi in italiano).",
+    dutch: "IMPORTANT: Respond ONLY in Dutch (Antwoord alstublieft in het Nederlands).",
+    turkish: "IMPORTANT: Respond ONLY in Turkish (Lütfen Türkçe cevap verin).",
+    indonesian: "IMPORTANT: Respond ONLY in Indonesian (Tolong jawab dalam bahasa Indonesia).",
+    vietnamese: "IMPORTANT: Respond ONLY in Vietnamese (Vui lòng trả lời bằng tiếng Việt).",
     english: "Respond in English.",
   };
 
