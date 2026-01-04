@@ -13,7 +13,7 @@ export const ChatWidget = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "👋 Namaste! I'm AIVocal's assistant. How can I help you today?\n\nआप Hindi, English या Hinglish में बात कर सकते हैं!"
+      content: "👋 Hello! I'm AIVocal's assistant. How can I help you today?"
     }
   ]);
   const [input, setInput] = useState("");
