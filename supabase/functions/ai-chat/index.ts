@@ -97,7 +97,7 @@ function detectLanguage(text: string): string {
   // Word-based detection for Latin script languages (expanded patterns)
   const spanishPatterns = /\b(hola|gracias|por favor|buenos|buenas|cómo|está|qué|muy|también|pero|porque|tengo|quiero|necesito|dónde|cuándo|puedo|sí|español|cuál|cuáles|precio|precios|modelo|servicio|servicios|empresa|ayuda|información|su|sus|este|esta|estos|estas|el|la|los|las|un|una|unos|unas|con|sin|para|por|del|al|más|menos|hacer|tiene|tienen|cuesta|cuánto|cuánta|ustedes|nosotros|nuestro|nuestra)\b/i;
   const frenchPatterns = /\b(bonjour|merci|s'il vous plaît|comment|êtes|très|aussi|mais|parce que|j'ai|je veux|où|quand|puis-je|oui|français|bonsoir|au revoir|quel|quelle|quels|quelles|prix|modèle|service|entreprise|aide|information|votre|vos|ce|cette|ces|le|la|les|un|une|des|avec|sans|pour|par|du|au|plus|moins|faire|avez|coûte|combien|vous|nous|notre|nos)\b/i;
-  const germanPatterns = /\b(hallo|danke|bitte|guten|wie|sehr|auch|aber|weil|ich habe|ich möchte|wo|wann|kann ich|ja|nein|deutsch|morgen|abend|welche|welcher|welches|preis|preise|modell|dienst|dienste|unternehmen|hilfe|information|ihr|ihre|dieser|diese|dieses|der|die|das|ein|eine|mit|ohne|für|von|mehr|weniger|machen|haben|kostet|wieviel|sie|wir|unser|unsere)\b/i;
+  const germanPatterns = /\b(hallo|danke|bitte|guten|wie|sehr|auch|aber|weil|ich|möchte|wo|wann|kann|ja|nein|deutsch|morgen|abend|welche|welcher|welches|preis|preise|modell|dienst|dienste|unternehmen|hilfe|information|ihr|ihre|dieser|diese|dieses|der|die|das|ein|eine|mit|ohne|für|von|mehr|weniger|machen|haben|kostet|wieviel|sie|wir|unser|unsere|ist|sind|was|warum|brauche|möglich|können|würde|gerne|service)\b/i;
   const portuguesePatterns = /\b(olá|obrigado|por favor|como|está|muito|também|mas|porque|tenho|quero|preciso|onde|quando|posso|sim|não|português|qual|quais|preço|preços|modelo|serviço|serviços|empresa|ajuda|informação|seu|sua|seus|suas|este|esta|estes|estas|o|a|os|as|um|uma|uns|umas|com|sem|para|por|do|ao|mais|menos|fazer|tem|custa|quanto|vocês|nós|nosso|nossa)\b/i;
   const italianPatterns = /\b(ciao|grazie|per favore|come|stai|molto|anche|ma|perché|ho|voglio|dove|quando|posso|sì|no|italiano|buongiorno|quale|quali|prezzo|prezzi|modello|servizio|servizi|azienda|aiuto|informazione|vostro|vostra|questo|questa|questi|queste|il|la|lo|i|le|gli|un|una|uno|con|senza|per|da|del|al|più|meno|fare|avete|costa|quanto|voi|noi|nostro|nostra)\b/i;
   const dutchPatterns = /\b(hallo|dank|alstublieft|hoe|gaat|zeer|ook|maar|omdat|ik heb|ik wil|waar|wanneer|kan ik|ja|nee|nederlands|welke|welk|prijs|prijzen|model|dienst|diensten|bedrijf|hulp|informatie|uw|dit|deze|de|het|een|met|zonder|voor|van|meer|minder|doen|heeft|kost|hoeveel|u|wij|ons|onze)\b/i;
@@ -133,12 +133,31 @@ function detectLanguage(text: string): string {
   if (odiaPattern.test(text)) return "odia";
   if (hindiPattern.test(text)) return "hindi";
   
-  // Latin script languages (word-based detection)
-  if (spanishPatterns.test(text)) return "spanish";
-  if (frenchPatterns.test(text)) return "french";
-  if (germanPatterns.test(text)) return "german";
-  if (portuguesePatterns.test(text)) return "portuguese";
-  if (italianPatterns.test(text)) return "italian";
+  // Latin script languages - use global matching for accurate scoring
+  const germanMatchPattern = /\b(hallo|danke|bitte|guten|wie|sehr|auch|aber|weil|ich|möchte|wo|wann|kann|ja|nein|deutsch|morgen|abend|welche|welcher|welches|preis|preise|modell|dienst|dienste|unternehmen|hilfe|ihr|ihre|dieser|diese|dieses|der|die|das|ein|eine|mit|ohne|für|von|mehr|weniger|machen|haben|kostet|wieviel|sie|wir|unser|unsere|ist|sind|was|warum|brauche|möglich|können|würde|gerne)\b/gi;
+  const frenchMatchPattern = /\b(bonjour|merci|comment|êtes|très|aussi|mais|j'ai|où|quand|oui|français|bonsoir|quel|quelle|quels|quelles|prix|modèle|entreprise|aide|votre|vos|ce|cette|ces|le|la|les|un|une|des|avec|sans|pour|par|du|au|plus|moins|faire|avez|coûte|combien|vous|nous|notre|nos)\b/gi;
+  const spanishMatchPattern = /\b(hola|gracias|buenos|buenas|cómo|está|qué|muy|también|pero|porque|tengo|quiero|necesito|dónde|cuándo|puedo|sí|español|cuál|cuáles|precio|precios|modelo|servicio|servicios|empresa|ayuda|información|su|sus|este|esta|estos|estas|el|la|los|las|un|una|unos|unas|con|sin|para|por|del|al|más|menos|hacer|tiene|tienen|cuesta|cuánto|cuánta)\b/gi;
+  const portugueseMatchPattern = /\b(olá|obrigado|como|está|muito|também|mas|porque|tenho|quero|preciso|onde|quando|posso|sim|não|português|qual|quais|preço|preços|modelo|serviço|serviços|empresa|ajuda|informação|seu|sua|seus|suas|este|esta|estes|estas|o|a|os|as|um|uma|uns|umas|com|sem|para|por|do|ao|mais|menos|fazer|tem|custa|quanto)\b/gi;
+  const italianMatchPattern = /\b(ciao|grazie|come|stai|molto|anche|ma|perché|ho|voglio|dove|quando|posso|sì|no|italiano|buongiorno|quale|quali|prezzo|prezzi|modello|servizio|servizi|azienda|aiuto|informazione|vostro|vostra|questo|questa|questi|queste|il|la|lo|i|le|gli|un|una|uno|con|senza|per|da|del|al|più|meno|fare|avete|costa|quanto)\b/gi;
+  
+  const germanScore = (text.match(germanMatchPattern) || []).length;
+  const frenchScore = (text.match(frenchMatchPattern) || []).length;
+  const spanishScore = (text.match(spanishMatchPattern) || []).length;
+  const portugueseScore = (text.match(portugueseMatchPattern) || []).length;
+  const italianScore = (text.match(italianMatchPattern) || []).length;
+  
+  // Pick language with most matches
+  const scores = [
+    { lang: "german", score: germanScore },
+    { lang: "french", score: frenchScore },
+    { lang: "spanish", score: spanishScore },
+    { lang: "portuguese", score: portugueseScore },
+    { lang: "italian", score: italianScore },
+  ];
+  
+  const bestMatch = scores.reduce((a, b) => a.score > b.score ? a : b);
+  if (bestMatch.score > 0) return bestMatch.lang;
+  
   if (dutchPatterns.test(text)) return "dutch";
   if (turkishPatterns.test(text)) return "turkish";
   if (indonesianPatterns.test(text)) return "indonesian";
