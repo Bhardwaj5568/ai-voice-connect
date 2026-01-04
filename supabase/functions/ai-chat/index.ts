@@ -228,24 +228,34 @@ function buildSystemPrompt(knowledge: string, detectedLang: string): string {
 
   const config = langConfig[detectedLang] || langConfig.english;
   
-  // Calculate prices in local currency (base prices in INR: 15000 and 35000)
-  const starterPrice = Math.round(15000 * config.rate);
-  const proPrice = Math.round(35000 * config.rate);
-  
-  // Format price with proper separators
-  const formatPrice = (price: number) => {
-    if (price >= 1000) {
-      return price.toLocaleString('en-US');
-    }
-    return price.toString();
-  };
-  
-  const pricingInfo = `
-PRICING (MUST use ${config.currency} currency with ${config.symbol} symbol):
-- Starter Plan: ${config.symbol}${formatPrice(starterPrice)}/month (1,000 AI calls)
-- Professional Plan: ${config.symbol}${formatPrice(proPrice)}/month (5,000 AI calls)
-- Enterprise Plan: Custom pricing (unlimited calls)
-IMPORTANT: Always show prices in ${config.currency} (${config.symbol}), NEVER use INR or ₹ for non-Indian languages.
+  // All available currencies for reference
+  const allCurrencies = `
+AVAILABLE CURRENCIES (use when customer specifies their country/currency):
+- India: ₹ (INR) - Starter: ₹15,000/month, Professional: ₹35,000/month
+- USA/UK: $ (USD) - Starter: $180/month, Professional: $420/month
+- Europe (Spain, France, Germany, Italy, etc.): € (EUR) - Starter: €165/month, Professional: €385/month
+- UAE/Dubai/Gulf: $ (USD) - Starter: $180/month, Professional: $420/month
+- Saudi Arabia: $ (USD) - Starter: $180/month, Professional: $420/month
+- Kuwait: $ (USD) - Starter: $180/month, Professional: $420/month
+- Bahrain: $ (USD) - Starter: $180/month, Professional: $420/month
+- Jordan: $ (USD) - Starter: $180/month, Professional: $420/month
+- Qatar: $ (USD) - Starter: $180/month, Professional: $420/month
+- China: ¥ (CNY) - Starter: ¥1,290/month, Professional: ¥3,010/month
+- Japan: ¥ (JPY) - Starter: ¥26,700/month, Professional: ¥62,300/month
+- South Korea: ₩ (KRW) - Starter: ₩243,000/month, Professional: ₩567,000/month
+- Russia: ₽ (RUB) - Starter: ₽16,200/month, Professional: ₽37,800/month
+- Turkey: ₺ (TRY) - Starter: ₺5,700/month, Professional: ₺13,300/month
+- Thailand: ฿ (THB) - Starter: ฿6,150/month, Professional: ฿14,350/month
+- Indonesia: Rp (IDR) - Starter: Rp2,820,000/month, Professional: Rp6,580,000/month
+- Vietnam: ₫ (VND) - Starter: ₫4,425,000/month, Professional: ₫10,325,000/month
+- Malaysia: RM (MYR) - Starter: RM795/month, Professional: RM1,855/month
+- Philippines: ₱ (PHP) - Starter: ₱10,050/month, Professional: ₱23,450/month
+- Israel: ₪ (ILS) - Starter: ₪645/month, Professional: ₪1,505/month
+- Australia: $ (AUD) - Starter: $275/month, Professional: $640/month
+- Canada: $ (CAD) - Starter: $245/month, Professional: $570/month
+- Brazil: R$ (BRL) - Starter: R$900/month, Professional: R$2,100/month
+- Mexico: $ (MXN) - Starter: $3,150/month, Professional: $7,350/month
+- Enterprise Plan: Custom pricing (unlimited calls) - available in all regions
 `;
 
   const langInstruction = config.instruction;
@@ -254,7 +264,7 @@ IMPORTANT: Always show prices in ${config.currency} (${config.symbol}), NEVER us
 
 IMPORTANT: ${langInstruction}
 
-${pricingInfo}
+${allCurrencies}
 
 KNOWLEDGE BASE:
 ${knowledge}
@@ -262,11 +272,15 @@ ${knowledge}
 RULES:
 1. Be friendly, helpful and concise
 2. Keep responses under 150 words
-3. If asked about pricing, ALWAYS use the currency and prices from PRICING section above - NEVER use INR for non-Indian languages
+3. **PRICING RULE - VERY IMPORTANT**: 
+   - When someone asks about pricing/price/cost/plans, FIRST ask them: "Which country or region are you from? This will help me share pricing in your local currency!"
+   - After they tell their country/currency, then share the pricing in their specific currency from the AVAILABLE CURRENCIES list above
+   - If they already mentioned their country/region in their message, directly share pricing in that currency
+   - If language is clearly Indian (Hindi, Bengali, Tamil, etc.), you can directly share INR pricing
 4. For demo requests, ask them to contact via WhatsApp: +91 7792848355
 5. Stay focused on AIVocal's services
 6. If you don't know something, honestly say so and suggest contacting support
-7. Use emojis sparingly to be friendly 😊`;
+7. Use emojis sparingly to be friendly`;
 }
 
 serve(async (req) => {
