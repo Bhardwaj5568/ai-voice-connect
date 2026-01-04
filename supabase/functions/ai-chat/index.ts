@@ -232,14 +232,16 @@ function buildSystemPrompt(knowledge: string, detectedLang: string): string {
   const allCurrencies = `
 AVAILABLE CURRENCIES (use when customer specifies their country/currency):
 - India: ₹ (INR) - Starter: ₹15,000/month, Professional: ₹35,000/month
-- USA/UK: $ (USD) - Starter: $180/month, Professional: $420/month
+- USA: $ (USD) - Starter: $180/month, Professional: $420/month
+- UK: £ (GBP) - Starter: £145/month, Professional: £340/month
 - Europe (Spain, France, Germany, Italy, etc.): € (EUR) - Starter: €165/month, Professional: €385/month
-- UAE/Dubai/Gulf: $ (USD) - Starter: $180/month, Professional: $420/month
-- Saudi Arabia: $ (USD) - Starter: $180/month, Professional: $420/month
-- Kuwait: $ (USD) - Starter: $180/month, Professional: $420/month
-- Bahrain: $ (USD) - Starter: $180/month, Professional: $420/month
-- Jordan: $ (USD) - Starter: $180/month, Professional: $420/month
-- Qatar: $ (USD) - Starter: $180/month, Professional: $420/month
+- UAE/Dubai: د.إ (AED) - Starter: د.إ660/month, Professional: د.إ1,540/month
+- Saudi Arabia: ر.س (SAR) - Starter: ر.س675/month, Professional: ر.س1,575/month
+- Kuwait: د.ك (KWD) - Starter: د.ك55/month, Professional: د.ك128/month
+- Bahrain: د.ب (BHD) - Starter: د.ب68/month, Professional: د.ب158/month
+- Jordan: د.أ (JOD) - Starter: د.أ128/month, Professional: د.أ298/month
+- Qatar: ر.ق (QAR) - Starter: ر.ق655/month, Professional: ر.ق1,530/month
+- Oman: ر.ع (OMR) - Starter: ر.ع69/month, Professional: ر.ع162/month
 - China: ¥ (CNY) - Starter: ¥1,290/month, Professional: ¥3,010/month
 - Japan: ¥ (JPY) - Starter: ¥26,700/month, Professional: ¥62,300/month
 - South Korea: ₩ (KRW) - Starter: ₩243,000/month, Professional: ₩567,000/month
