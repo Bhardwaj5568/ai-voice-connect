@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageCircle, X, Send, Bot, User, Loader2, Volume2, VolumeX } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -7,18 +7,6 @@ interface Message {
   role: "user" | "assistant";
   content: string;
 }
-
-// Sound effect URLs (short notification sounds)
-const SOUND_MESSAGE_RECEIVED = "https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3";
-const SOUND_MESSAGE_SENT = "https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3";
-
-const playSound = (url: string, volume: number = 0.3) => {
-  try {
-    const audio = new Audio(url);
-    audio.volume = volume;
-    audio.play().catch(() => {});
-  } catch {}
-};
 
 export const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +19,6 @@ export const ChatWidget = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [detectedLanguage, setDetectedLanguage] = useState("english");
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,11 +45,6 @@ export const ChatWidget = () => {
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
     setIsTyping(true);
-    
-    // Play sent sound
-    if (soundEnabled) {
-      playSound(SOUND_MESSAGE_SENT, 0.2);
-    }
 
     try {
       const { data, error } = await supabase.functions.invoke("ai-chat", {
@@ -93,10 +75,6 @@ export const ChatWidget = () => {
         }]);
         if (data.language) {
           setDetectedLanguage(data.language);
-        }
-        // Play received sound
-        if (soundEnabled) {
-          playSound(SOUND_MESSAGE_RECEIVED, 0.3);
         }
       }
     } catch (error) {
@@ -169,23 +147,13 @@ export const ChatWidget = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
-              aria-label={soundEnabled ? "Mute sounds" : "Enable sounds"}
-              title={soundEnabled ? "Mute sounds" : "Enable sounds"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
-              aria-label="Close chat"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+            aria-label="Close chat"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Messages */}
