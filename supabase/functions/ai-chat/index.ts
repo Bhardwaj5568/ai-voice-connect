@@ -94,16 +94,16 @@ function detectLanguage(text: string): string {
   const hebrewPattern = /[\u0590-\u05FF]/;
   const greekPattern = /[\u0370-\u03FF]/;
   
-  // Word-based detection for Latin script languages
-  const spanishPatterns = /\b(hola|gracias|por favor|buenos|buenas|cómo|está|qué|muy|también|pero|porque|tengo|quiero|necesito|dónde|cuándo|puedo|sí|español)\b/i;
-  const frenchPatterns = /\b(bonjour|merci|s'il vous plaît|comment|êtes|très|aussi|mais|parce que|j'ai|je veux|où|quand|puis-je|oui|français|bonsoir|au revoir)\b/i;
-  const germanPatterns = /\b(hallo|danke|bitte|guten|wie|sehr|auch|aber|weil|ich habe|ich möchte|wo|wann|kann ich|ja|nein|deutsch|morgen|abend)\b/i;
-  const portuguesePatterns = /\b(olá|obrigado|por favor|como|está|muito|também|mas|porque|tenho|quero|preciso|onde|quando|posso|sim|não|português)\b/i;
-  const italianPatterns = /\b(ciao|grazie|per favore|come|stai|molto|anche|ma|perché|ho|voglio|dove|quando|posso|sì|no|italiano|buongiorno)\b/i;
-  const dutchPatterns = /\b(hallo|dank|alstublieft|hoe|gaat|zeer|ook|maar|omdat|ik heb|ik wil|waar|wanneer|kan ik|ja|nee|nederlands)\b/i;
-  const turkishPatterns = /\b(merhaba|teşekkür|lütfen|nasıl|çok|da|ama|çünkü|istiyorum|nerede|ne zaman|yapabilir miyim|evet|hayır|türkçe)\b/i;
-  const indonesianPatterns = /\b(halo|terima kasih|tolong|bagaimana|sangat|juga|tetapi|karena|saya|ingin|di mana|kapan|bisa|ya|tidak|indonesia)\b/i;
-  const vietnamesePatterns = /\b(xin chào|cảm ơn|làm ơn|như thế nào|rất|cũng|nhưng|vì|tôi|muốn|ở đâu|khi nào|có thể|vâng|không|tiếng việt)\b/i;
+  // Word-based detection for Latin script languages (expanded patterns)
+  const spanishPatterns = /\b(hola|gracias|por favor|buenos|buenas|cómo|está|qué|muy|también|pero|porque|tengo|quiero|necesito|dónde|cuándo|puedo|sí|español|cuál|cuáles|precio|precios|modelo|servicio|servicios|empresa|ayuda|información|su|sus|este|esta|estos|estas|el|la|los|las|un|una|unos|unas|con|sin|para|por|del|al|más|menos|hacer|tiene|tienen|cuesta|cuánto|cuánta|ustedes|nosotros|nuestro|nuestra)\b/i;
+  const frenchPatterns = /\b(bonjour|merci|s'il vous plaît|comment|êtes|très|aussi|mais|parce que|j'ai|je veux|où|quand|puis-je|oui|français|bonsoir|au revoir|quel|quelle|quels|quelles|prix|modèle|service|entreprise|aide|information|votre|vos|ce|cette|ces|le|la|les|un|une|des|avec|sans|pour|par|du|au|plus|moins|faire|avez|coûte|combien|vous|nous|notre|nos)\b/i;
+  const germanPatterns = /\b(hallo|danke|bitte|guten|wie|sehr|auch|aber|weil|ich habe|ich möchte|wo|wann|kann ich|ja|nein|deutsch|morgen|abend|welche|welcher|welches|preis|preise|modell|dienst|dienste|unternehmen|hilfe|information|ihr|ihre|dieser|diese|dieses|der|die|das|ein|eine|mit|ohne|für|von|mehr|weniger|machen|haben|kostet|wieviel|sie|wir|unser|unsere)\b/i;
+  const portuguesePatterns = /\b(olá|obrigado|por favor|como|está|muito|também|mas|porque|tenho|quero|preciso|onde|quando|posso|sim|não|português|qual|quais|preço|preços|modelo|serviço|serviços|empresa|ajuda|informação|seu|sua|seus|suas|este|esta|estes|estas|o|a|os|as|um|uma|uns|umas|com|sem|para|por|do|ao|mais|menos|fazer|tem|custa|quanto|vocês|nós|nosso|nossa)\b/i;
+  const italianPatterns = /\b(ciao|grazie|per favore|come|stai|molto|anche|ma|perché|ho|voglio|dove|quando|posso|sì|no|italiano|buongiorno|quale|quali|prezzo|prezzi|modello|servizio|servizi|azienda|aiuto|informazione|vostro|vostra|questo|questa|questi|queste|il|la|lo|i|le|gli|un|una|uno|con|senza|per|da|del|al|più|meno|fare|avete|costa|quanto|voi|noi|nostro|nostra)\b/i;
+  const dutchPatterns = /\b(hallo|dank|alstublieft|hoe|gaat|zeer|ook|maar|omdat|ik heb|ik wil|waar|wanneer|kan ik|ja|nee|nederlands|welke|welk|prijs|prijzen|model|dienst|diensten|bedrijf|hulp|informatie|uw|dit|deze|de|het|een|met|zonder|voor|van|meer|minder|doen|heeft|kost|hoeveel|u|wij|ons|onze)\b/i;
+  const turkishPatterns = /\b(merhaba|teşekkür|lütfen|nasıl|çok|da|ama|çünkü|istiyorum|nerede|ne zaman|yapabilir miyim|evet|hayır|türkçe|hangi|fiyat|fiyatlar|model|hizmet|hizmetler|şirket|yardım|bilgi|sizin|bu|şu|bir|ile|için|den|dan|daha|az|yapmak|var|kaç|ne kadar|siz|biz|bizim)\b/i;
+  const indonesianPatterns = /\b(halo|terima kasih|tolong|bagaimana|sangat|juga|tetapi|karena|saya|ingin|di mana|kapan|bisa|ya|tidak|indonesia|mana|harga|model|layanan|perusahaan|bantuan|informasi|anda|ini|itu|sebuah|dengan|tanpa|untuk|dari|lebih|kurang|melakukan|ada|berapa|kami|kita|kami punya)\b/i;
+  const vietnamesePatterns = /\b(xin chào|cảm ơn|làm ơn|như thế nào|rất|cũng|nhưng|vì|tôi|muốn|ở đâu|khi nào|có thể|vâng|không|tiếng việt|nào|giá|mô hình|dịch vụ|công ty|giúp đỡ|thông tin|của bạn|này|đó|một|với|không có|cho|từ|hơn|ít|làm|có|bao nhiêu|bạn|chúng tôi|của chúng tôi)\b/i;
   
   // Hinglish patterns
   const hinglishPatterns = [
