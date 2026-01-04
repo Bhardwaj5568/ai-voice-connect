@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { MessageCircle, X, Send, Bot, User, Loader2, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -7,6 +7,18 @@ interface Message {
   role: "user" | "assistant";
   content: string;
 }
+
+// Sound effect URLs (short notification sounds)
+const SOUND_MESSAGE_RECEIVED = "https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3";
+const SOUND_MESSAGE_SENT = "https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3";
+
+const playSound = (url: string, volume: number = 0.3) => {
+  try {
+    const audio = new Audio(url);
+    audio.volume = volume;
+    audio.play().catch(() => {});
+  } catch {}
+};
 
 export const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
