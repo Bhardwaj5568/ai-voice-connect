@@ -228,36 +228,119 @@ function buildSystemPrompt(knowledge: string, detectedLang: string): string {
 
   const config = langConfig[detectedLang] || langConfig.english;
   
-  // All available currencies for reference
+  // Comprehensive worldwide currencies (base: INR 15,000/35,000)
   const allCurrencies = `
-AVAILABLE CURRENCIES (use when customer specifies their country/currency):
+WORLDWIDE PRICING (use exact currency for customer's country):
+
+🇮🇳 SOUTH ASIA:
 - India: ₹ (INR) - Starter: ₹15,000/month, Professional: ₹35,000/month
+- Pakistan: Rs (PKR) - Starter: Rs50,100/month, Professional: Rs116,900/month
+- Bangladesh: ৳ (BDT) - Starter: ৳19,500/month, Professional: ৳45,500/month
+- Sri Lanka: Rs (LKR) - Starter: Rs54,000/month, Professional: Rs126,000/month
+- Nepal: रू (NPR) - Starter: रू24,000/month, Professional: रू56,000/month
+
+🇺🇸 NORTH AMERICA:
 - USA: $ (USD) - Starter: $180/month, Professional: $420/month
+- Canada: C$ (CAD) - Starter: C$245/month, Professional: C$570/month
+
+🇬🇧 UK & EUROPE:
 - UK: £ (GBP) - Starter: £145/month, Professional: £340/month
-- Europe (Spain, France, Germany, Italy, etc.): € (EUR) - Starter: €165/month, Professional: €385/month
+- Eurozone (Germany, France, Italy, Spain, Netherlands, Belgium, Austria, Ireland, Portugal, Greece, Finland): € (EUR) - Starter: €165/month, Professional: €385/month
+- Switzerland: CHF (CHF) - Starter: CHF160/month, Professional: CHF375/month
+- Sweden: kr (SEK) - Starter: kr1,890/month, Professional: kr4,410/month
+- Norway: kr (NOK) - Starter: kr1,935/month, Professional: kr4,515/month
+- Denmark: kr (DKK) - Starter: kr1,230/month, Professional: kr2,870/month
+- Poland: zł (PLN) - Starter: zł720/month, Professional: zł1,680/month
+- Czech Republic: Kč (CZK) - Starter: Kč4,050/month, Professional: Kč9,450/month
+- Hungary: Ft (HUF) - Starter: Ft64,800/month, Professional: Ft151,200/month
+- Romania: lei (RON) - Starter: lei810/month, Professional: lei1,890/month
+- Ukraine: ₴ (UAH) - Starter: ₴6,660/month, Professional: ₴15,540/month
+
+🇦🇪 MIDDLE EAST & GULF:
 - UAE/Dubai: د.إ (AED) - Starter: د.إ660/month, Professional: د.إ1,540/month
 - Saudi Arabia: ر.س (SAR) - Starter: ر.س675/month, Professional: ر.س1,575/month
 - Kuwait: د.ك (KWD) - Starter: د.ك55/month, Professional: د.ك128/month
 - Bahrain: د.ب (BHD) - Starter: د.ب68/month, Professional: د.ب158/month
-- Jordan: د.أ (JOD) - Starter: د.أ128/month, Professional: د.أ298/month
 - Qatar: ر.ق (QAR) - Starter: ر.ق655/month, Professional: ر.ق1,530/month
 - Oman: ر.ع (OMR) - Starter: ر.ع69/month, Professional: ر.ع162/month
+- Jordan: د.أ (JOD) - Starter: د.أ128/month, Professional: د.أ298/month
+- Lebanon: $ (USD) - Starter: $180/month, Professional: $420/month
+- Egypt: ج.م (EGP) - Starter: ج.م8,820/month, Professional: ج.م20,580/month
+- Iraq: ع.د (IQD) - Starter: ع.د235,800/month, Professional: ع.د550,200/month
+- Iran: ﷼ (IRR) - Starter: ﷼7,560,000/month, Professional: ﷼17,640,000/month
+- Israel: ₪ (ILS) - Starter: ₪645/month, Professional: ₪1,505/month
+- Turkey: ₺ (TRY) - Starter: ₺5,700/month, Professional: ₺13,300/month
+
+🇨🇳 EAST ASIA:
 - China: ¥ (CNY) - Starter: ¥1,290/month, Professional: ¥3,010/month
 - Japan: ¥ (JPY) - Starter: ¥26,700/month, Professional: ¥62,300/month
 - South Korea: ₩ (KRW) - Starter: ₩243,000/month, Professional: ₩567,000/month
-- Russia: ₽ (RUB) - Starter: ₽16,200/month, Professional: ₽37,800/month
-- Turkey: ₺ (TRY) - Starter: ₺5,700/month, Professional: ₺13,300/month
+- Taiwan: NT$ (TWD) - Starter: NT$5,670/month, Professional: NT$13,230/month
+- Hong Kong: HK$ (HKD) - Starter: HK$1,404/month, Professional: HK$3,276/month
+- Macau: MOP$ (MOP) - Starter: MOP$1,449/month, Professional: MOP$3,381/month
+- Mongolia: ₮ (MNT) - Starter: ₮612,000/month, Professional: ₮1,428,000/month
+
+🇹🇭 SOUTHEAST ASIA:
 - Thailand: ฿ (THB) - Starter: ฿6,150/month, Professional: ฿14,350/month
-- Indonesia: Rp (IDR) - Starter: Rp2,820,000/month, Professional: Rp6,580,000/month
 - Vietnam: ₫ (VND) - Starter: ₫4,425,000/month, Professional: ₫10,325,000/month
+- Indonesia: Rp (IDR) - Starter: Rp2,820,000/month, Professional: Rp6,580,000/month
 - Malaysia: RM (MYR) - Starter: RM795/month, Professional: RM1,855/month
+- Singapore: S$ (SGD) - Starter: S$243/month, Professional: S$567/month
 - Philippines: ₱ (PHP) - Starter: ₱10,050/month, Professional: ₱23,450/month
-- Israel: ₪ (ILS) - Starter: ₪645/month, Professional: ₪1,505/month
-- Australia: $ (AUD) - Starter: $275/month, Professional: $640/month
-- Canada: $ (CAD) - Starter: $245/month, Professional: $570/month
+- Myanmar: K (MMK) - Starter: K378,000/month, Professional: K882,000/month
+- Cambodia: ៛ (KHR) - Starter: ៛729,000/month, Professional: ៛1,701,000/month
+- Laos: ₭ (LAK) - Starter: ₭3,735,000/month, Professional: ₭8,715,000/month
+- Brunei: B$ (BND) - Starter: B$243/month, Professional: B$567/month
+
+🇦🇺 OCEANIA:
+- Australia: A$ (AUD) - Starter: A$275/month, Professional: A$640/month
+- New Zealand: NZ$ (NZD) - Starter: NZ$297/month, Professional: NZ$693/month
+- Fiji: FJ$ (FJD) - Starter: FJ$405/month, Professional: FJ$945/month
+
+🇧🇷 LATIN AMERICA:
 - Brazil: R$ (BRL) - Starter: R$900/month, Professional: R$2,100/month
-- Mexico: $ (MXN) - Starter: $3,150/month, Professional: $7,350/month
-- Enterprise Plan: Custom pricing (unlimited calls) - available in all regions
+- Mexico: MX$ (MXN) - Starter: MX$3,150/month, Professional: MX$7,350/month
+- Argentina: ARS$ (ARS) - Starter: ARS$154,800/month, Professional: ARS$361,200/month
+- Colombia: COL$ (COP) - Starter: COL$720,000/month, Professional: COL$1,680,000/month
+- Chile: CLP$ (CLP) - Starter: CLP$167,400/month, Professional: CLP$390,600/month
+- Peru: S/ (PEN) - Starter: S/666/month, Professional: S/1,554/month
+- Venezuela: Bs (VES) - Starter: Bs6,480/month, Professional: Bs15,120/month
+- Ecuador: $ (USD) - Starter: $180/month, Professional: $420/month
+- Uruguay: $U (UYU) - Starter: $U7,020/month, Professional: $U16,380/month
+- Paraguay: ₲ (PYG) - Starter: ₲1,314,000/month, Professional: ₲3,066,000/month
+- Bolivia: Bs (BOB) - Starter: Bs1,242/month, Professional: Bs2,898/month
+- Costa Rica: ₡ (CRC) - Starter: ₡94,500/month, Professional: ₡220,500/month
+- Panama: $ (USD) - Starter: $180/month, Professional: $420/month
+
+🇿🇦 AFRICA:
+- South Africa: R (ZAR) - Starter: R3,240/month, Professional: R7,560/month
+- Nigeria: ₦ (NGN) - Starter: ₦270,000/month, Professional: ₦630,000/month
+- Kenya: KSh (KES) - Starter: KSh23,220/month, Professional: KSh54,180/month
+- Ghana: GH₵ (GHS) - Starter: GH₵2,790/month, Professional: GH₵6,510/month
+- Ethiopia: Br (ETB) - Starter: Br10,080/month, Professional: Br23,520/month
+- Egypt: ج.م (EGP) - Starter: ج.م8,820/month, Professional: ج.م20,580/month
+- Morocco: د.م (MAD) - Starter: د.م1,800/month, Professional: د.م4,200/month
+- Algeria: د.ج (DZD) - Starter: د.ج24,210/month, Professional: د.ج56,490/month
+- Tunisia: د.ت (TND) - Starter: د.ت558/month, Professional: د.ت1,302/month
+- Tanzania: TSh (TZS) - Starter: TSh459,000/month, Professional: TSh1,071,000/month
+- Uganda: USh (UGX) - Starter: USh666,000/month, Professional: USh1,554,000/month
+
+🇷🇺 CIS/CENTRAL ASIA:
+- Russia: ₽ (RUB) - Starter: ₽16,200/month, Professional: ₽37,800/month
+- Kazakhstan: ₸ (KZT) - Starter: ₸81,000/month, Professional: ₸189,000/month
+- Uzbekistan: so'm (UZS) - Starter: so'm2,178,000/month, Professional: so'm5,082,000/month
+- Azerbaijan: ₼ (AZN) - Starter: ₼306/month, Professional: ₼714/month
+- Georgia: ₾ (GEL) - Starter: ₾486/month, Professional: ₾1,134/month
+- Armenia: ֏ (AMD) - Starter: ֏69,300/month, Professional: ֏161,700/month
+- Belarus: Br (BYN) - Starter: Br585/month, Professional: Br1,365/month
+
+🇨🇦 CARIBBEAN:
+- Jamaica: J$ (JMD) - Starter: J$27,900/month, Professional: J$65,100/month
+- Trinidad: TT$ (TTD) - Starter: TT$1,215/month, Professional: TT$2,835/month
+- Bahamas: B$ (BSD) - Starter: B$180/month, Professional: B$420/month
+- Dominican Republic: RD$ (DOP) - Starter: RD$10,620/month, Professional: RD$24,780/month
+
+🏢 ENTERPRISE: Custom pricing (unlimited calls) - available worldwide in any currency
 `;
 
   const langInstruction = config.instruction;
