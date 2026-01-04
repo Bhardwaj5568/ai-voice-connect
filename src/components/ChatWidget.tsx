@@ -98,9 +98,9 @@ export const ChatWidget = () => {
 
   const getLanguageLabel = () => {
     const labels: Record<string, string> = {
+      // Indian
       hindi: "हिंदी",
       hinglish: "Hinglish",
-      english: "English",
       bengali: "বাংলা",
       tamil: "தமிழ்",
       telugu: "తెలుగు",
@@ -108,7 +108,26 @@ export const ChatWidget = () => {
       kannada: "ಕನ್ನಡ",
       malayalam: "മലയാളം",
       punjabi: "ਪੰਜਾਬੀ",
-      odia: "ଓଡ଼ିଆ"
+      odia: "ଓଡ଼ିଆ",
+      // International
+      arabic: "العربية",
+      chinese: "中文",
+      japanese: "日本語",
+      korean: "한국어",
+      russian: "Русский",
+      thai: "ไทย",
+      hebrew: "עברית",
+      greek: "Ελληνικά",
+      spanish: "Español",
+      french: "Français",
+      german: "Deutsch",
+      portuguese: "Português",
+      italian: "Italiano",
+      dutch: "Nederlands",
+      turkish: "Türkçe",
+      indonesian: "Bahasa",
+      vietnamese: "Tiếng Việt",
+      english: "English"
     };
     return labels[detectedLanguage] || "English";
   };
