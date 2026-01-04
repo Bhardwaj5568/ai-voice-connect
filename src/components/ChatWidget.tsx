@@ -104,7 +104,11 @@ export const ChatWidget = () => {
       bengali: "বাংলা",
       tamil: "தமிழ்",
       telugu: "తెలుగు",
-      marathi: "मराठी"
+      gujarati: "ગુજરાતી",
+      kannada: "ಕನ್ನಡ",
+      malayalam: "മലയാളം",
+      punjabi: "ਪੰਜਾਬੀ",
+      odia: "ଓଡ଼ିଆ"
     };
     return labels[detectedLanguage] || "English";
   };
