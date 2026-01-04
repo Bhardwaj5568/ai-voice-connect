@@ -31,6 +31,8 @@ export const ChatWidget = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [detectedLanguage, setDetectedLanguage] = useState("english");
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,6 +57,12 @@ export const ChatWidget = () => {
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
+    setIsTyping(true);
+    
+    // Play sent sound
+    if (soundEnabled) {
+      playSound(SOUND_MESSAGE_SENT, 0.2);
+    }
 
     try {
       const { data, error } = await supabase.functions.invoke("ai-chat", {
@@ -69,6 +77,10 @@ export const ChatWidget = () => {
 
       if (error) throw error;
 
+      // Simulate typing delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setIsTyping(false);
+
       if (data.error) {
         setMessages(prev => [...prev, {
           role: "assistant",
@@ -82,9 +94,14 @@ export const ChatWidget = () => {
         if (data.language) {
           setDetectedLanguage(data.language);
         }
+        // Play received sound
+        if (soundEnabled) {
+          playSound(SOUND_MESSAGE_RECEIVED, 0.3);
+        }
       }
     } catch (error) {
       console.error("Chat error:", error);
+      setIsTyping(false);
       setMessages(prev => [...prev, {
         role: "assistant",
         content: "Sorry, something went wrong. Please try again or contact us via WhatsApp."
@@ -133,23 +150,42 @@ export const ChatWidget = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary to-cyan-500 text-white">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center animate-pulse">
               <Bot className="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-semibold text-sm">AIVocal Assistant</h3>
               <p className="text-xs text-white/80">
-                {isLoading ? "Typing..." : `🌐 ${getLanguageLabel()}`}
+                {isTyping ? (
+                  <span className="flex items-center gap-1">
+                    <span className="animate-pulse">Typing</span>
+                    <span className="flex gap-0.5">
+                      <span className="w-1 h-1 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1 h-1 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1 h-1 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </span>
+                  </span>
+                ) : `🌐 ${getLanguageLabel()}`}
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
-            aria-label="Close chat"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+              aria-label={soundEnabled ? "Mute sounds" : "Enable sounds"}
+              title={soundEnabled ? "Mute sounds" : "Enable sounds"}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+              aria-label="Close chat"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Messages */}
@@ -165,10 +201,10 @@ export const ChatWidget = () => {
                 </div>
               )}
               <div
-                className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
+                className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap animate-fade-in ${
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground rounded-br-md"
-                    : "bg-background border border-border rounded-bl-md"
+                    : "bg-background border border-border rounded-bl-md shadow-sm"
                 }`}
               >
                 {msg.content}
