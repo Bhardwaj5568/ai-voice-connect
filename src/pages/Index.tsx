@@ -20,6 +20,7 @@ import { FounderSection } from "@/components/FounderSection";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { Footer } from "@/components/Footer";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
+import { ChatWidget } from "@/components/ChatWidget";
 
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { CaseStudiesSection } from "@/components/CaseStudiesSection";
@@ -106,6 +107,7 @@ const Index = () => {
       </main>
       <Footer />
       <FloatingWhatsApp />
+      <ChatWidget />
       
       <LiveActivityFeed />
     </div>
