@@ -73,45 +73,67 @@ Website: aivocal.in
 }
 
 function detectLanguage(text: string): string {
+  // Hindi (Devanagari script)
   const hindiPattern = /[\u0900-\u097F]/;
+  // Bengali script
+  const bengaliPattern = /[\u0980-\u09FF]/;
+  // Tamil script
+  const tamilPattern = /[\u0B80-\u0BFF]/;
+  // Telugu script
+  const teluguPattern = /[\u0C00-\u0C7F]/;
+  // Gujarati script
+  const gujaratiPattern = /[\u0A80-\u0AFF]/;
+  // Kannada script
+  const kannadaPattern = /[\u0C80-\u0CFF]/;
+  // Malayalam script
+  const malayalamPattern = /[\u0D00-\u0D7F]/;
+  // Punjabi (Gurmukhi) script
+  const punjabiPattern = /[\u0A00-\u0A7F]/;
+  // Odia script
+  const odiaPattern = /[\u0B00-\u0B7F]/;
+  
+  // Hinglish patterns (Hindi words in Roman script)
   const hinglishPatterns = [
     /\b(hai|hain|ho|tha|thi|the|ka|ki|ke|ko|se|me|ye|wo|kya|kaise|kab|kahan|kyun|aur|par|bhi|nahi|mat|abhi|bahut|accha|theek|sab|kuch|aap|tum|hum|main|mera|tera|uska|iska|wala|wali|wale)\b/i,
-    /\b(karo|karna|karenge|karunga|karungi|bolo|bolna|batao|batana|dekho|dekhna|suno|sunna|jao|jana|aao|aana|khao|khana|piyo|pina)\b/i,
+    /\b(karo|karna|karenge|karunga|karungi|bolo|bolna|batao|batana|dekho|dekhna|suno|sunna|jao|jana|aao|aana|khao|khana|piyo|pina|chahiye|chahte|milega|dedo|lelo)\b/i,
+    /\b(namaste|dhanyavad|shukriya|kripya|jaroor|zaroor|bilkul|lekin|isliye|kyunki|phir|warna|matlab|samajh|pata)\b/i,
   ];
-
-  if (hindiPattern.test(text)) return "hindi";
-  for (const pattern of hinglishPatterns) {
-    if (pattern.test(text)) return "hinglish";
-  }
   
-  // Check for other languages
-  const bengaliPattern = /[\u0980-\u09FF]/;
-  const tamilPattern = /[\u0B80-\u0BFF]/;
-  const teluguPattern = /[\u0C00-\u0C7F]/;
-  const marathiPattern = /[\u0900-\u097F].*[\u0900-\u097F]/;
-  
+  // Check for script-based languages first
   if (bengaliPattern.test(text)) return "bengali";
   if (tamilPattern.test(text)) return "tamil";
   if (teluguPattern.test(text)) return "telugu";
-  if (marathiPattern.test(text) && hindiPattern.test(text)) return "marathi";
+  if (gujaratiPattern.test(text)) return "gujarati";
+  if (kannadaPattern.test(text)) return "kannada";
+  if (malayalamPattern.test(text)) return "malayalam";
+  if (punjabiPattern.test(text)) return "punjabi";
+  if (odiaPattern.test(text)) return "odia";
+  if (hindiPattern.test(text)) return "hindi";
+  
+  // Check for Hinglish (Roman script Hindi)
+  for (const pattern of hinglishPatterns) {
+    if (pattern.test(text)) return "hinglish";
+  }
   
   return "english";
 }
 
 function buildSystemPrompt(knowledge: string, detectedLang: string): string {
-  const langInstruction = detectedLang === "hindi" 
-    ? "Respond in Hindi (Devanagari script)."
-    : detectedLang === "hinglish"
-    ? "Respond in Hinglish (Hindi words in Roman script mixed with English)."
-    : detectedLang === "bengali"
-    ? "Respond in Bengali."
-    : detectedLang === "tamil"
-    ? "Respond in Tamil."
-    : detectedLang === "telugu"
-    ? "Respond in Telugu."
-    : detectedLang === "marathi"
-    ? "Respond in Marathi."
-    : "Respond in English.";
+  const langInstructions: Record<string, string> = {
+    hindi: "IMPORTANT: Respond ONLY in Hindi (Devanagari script - हिंदी में जवाब दें).",
+    hinglish: "IMPORTANT: Respond in Hinglish (Hindi words in Roman script mixed with English, like 'Aapka swagat hai!').",
+    bengali: "IMPORTANT: Respond ONLY in Bengali (বাংলায় উত্তর দিন).",
+    tamil: "IMPORTANT: Respond ONLY in Tamil (தமிழில் பதிலளிக்கவும்).",
+    telugu: "IMPORTANT: Respond ONLY in Telugu (తెలుగులో సమాధానం ఇవ్వండి).",
+    gujarati: "IMPORTANT: Respond ONLY in Gujarati (ગુજરાતીમાં જવાબ આપો).",
+    kannada: "IMPORTANT: Respond ONLY in Kannada (ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ).",
+    malayalam: "IMPORTANT: Respond ONLY in Malayalam (മലയാളത്തിൽ മറുപടി നൽകുക).",
+    punjabi: "IMPORTANT: Respond ONLY in Punjabi (ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ).",
+    odia: "IMPORTANT: Respond ONLY in Odia (ଓଡ଼ିଆରେ ଉତ୍ତର ଦିଅନ୍ତୁ).",
+    english: "Respond in English.",
+  };
+
+  const langInstruction = langInstructions[detectedLang] || langInstructions.english;
 
   return `You are AIVocal's helpful AI assistant. You help visitors learn about our AI voice calling services.
 
