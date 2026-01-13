@@ -18,7 +18,7 @@ const founders = [
     name: "Chandrabhan",
     role: "Co-Founder",
     image: cofounderImage,
-    location: "India",
+    location: "Hanumangarh, Rajasthan, India",
     linkedin: "https://www.linkedin.com/in/chandrabhan1802/",
     bio: "Passionate about leveraging AI to transform businesses. I focus on building strategic partnerships and ensuring our clients get the best AI voice solutions tailored to their needs."
   }
