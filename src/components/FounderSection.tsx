@@ -1,4 +1,4 @@
-import { Linkedin, MapPin, ExternalLink } from "lucide-react";
+import { Linkedin, MapPin, ExternalLink, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import founderImage from "@/assets/founder-neeraj.jpg";
@@ -11,6 +11,7 @@ const founders = [
     image: founderImage,
     location: "Jaipur, Rajasthan, India",
     linkedin: "https://www.linkedin.com/in/neeraj-sharma-42834b167/",
+    instagram: "https://www.instagram.com/neeraj_sharma_.__?igsh=ZWF1d3hnaWE2azN1",
     bio: "I started this agency because I believe AI should be practical, not complicated. My focus is on delivering real business outcomes—not just selling tools. I work with businesses worldwide to implement AI voice solutions that actually work."
   },
   {
@@ -65,17 +66,32 @@ export const FounderSection = () => {
                     <p className="text-muted-foreground mb-6 text-sm">
                       {founder.bio}
                     </p>
-                    <Button asChild variant="outline" size="default">
-                      <a 
-                        href={founder.linkedin} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                      >
-                        <Linkedin className="w-4 h-4" />
-                        Connect on LinkedIn
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </Button>
+                    <div className="flex gap-3 flex-wrap justify-center">
+                      <Button asChild variant="outline" size="default">
+                        <a 
+                          href={founder.linkedin} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                        >
+                          <Linkedin className="w-4 h-4" />
+                          LinkedIn
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </Button>
+                      {founder.instagram && (
+                        <Button asChild variant="outline" size="default">
+                          <a 
+                            href={founder.instagram} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <Instagram className="w-4 h-4" />
+                            Instagram
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </ScrollReveal>
